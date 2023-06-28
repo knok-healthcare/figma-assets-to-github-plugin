@@ -1,0 +1,367 @@
+<div class="flex-container">
+  <nav class="etg-navigation">
+    <button id="assetConfigurationsTab">Assets</button>
+    <button id="githubConfigurationsTab">Github</button>
+  </nav>
+
+  <main id="assetConfigurationsTabContent" class="tab-content">
+    <label>Export as</label>
+    <select id="exportFormat" placeholder="End format of the exported assets">
+      <option value="default">Original format</option>
+      <option value="SVG">SVG</option>
+      <option value="Vue">Vue component</option>
+    </select>
+
+    <div id="defaultBoardPicker" class="content-group">
+      <label>Figma Board</label>
+      <select id="figmaBoard" placeholder="Board with assets to be exported">
+        <option value="-1" disabled>Please select an option</option>
+      </select>
+    </div>
+
+    <div id="vueComponentSettings" class="content-group">
+      <div class="content-group inline">
+        <label>Enable RTL</label>
+        <input type="checkbox" id="rtlEnabled" />
+      </div>
+
+      <div id="rtlEnabledBoardPicker" class="content-group">
+        <label>RTL Board</label>
+        <select
+          id="figmaRTLBoard"
+          placeholder="Board with assets in right-to-left orientation."
+        >
+          <option value="-1" disabled>Please select an option</option>
+        </select>
+      </div>
+    </div>
+  </main>
+
+  <main
+    id="githubConfigurationsTabContent"
+    class="tab-content"
+    style="display: none"
+  >
+    <h6>Repository</h6>
+    <div class="row">
+      <div class="col">
+        <label for="repositoryOwner">Repository owner</label>
+        <input
+          id="repositoryOwner"
+          type="text"
+          placeholder="example: knok-healthcare"
+        />
+      </div>
+
+      <div class="col">
+        <label for="repositoryName">Repository name</label>
+        <input
+          id="repositoryName"
+          type="text"
+          placeholder="example: my-cool-vue-repository"
+        />
+      </div>
+    </div>
+
+    <label for="destinationFolder">Destination folder</label>
+    <input
+      id="destinationFolder"
+      type="text"
+      placeholder="example: /src/assets/icons"
+    />
+
+    <h6>Authentication</h6>
+    <label for="githubAccessToken">Github access token</label>
+    <input
+      id="githubAccessToken"
+      type="password"
+      placeholder="Github Access Token (with permissions to write to the repository configured above)"
+    />
+  </main>
+
+  <footer class="etg-footer">
+    <button id="exportAssetsButton" class="export-assets-button">Export</button>
+  </footer>
+</div>
+
+<script>
+  const SELECTED_TAB_IDENTIFIER_CLASS = "selected-tab",
+    NAVIGATION_TABS = ["assetConfigurationsTab", "githubConfigurationsTab"];
+
+  // ===== Navigation
+  function preSelectFirstTab() {
+    this[NAVIGATION_TABS[0]].classList.add(SELECTED_TAB_IDENTIFIER_CLASS);
+  }
+
+  function resetSelectedTabIndicator() {
+    NAVIGATION_TABS.forEach((tab) => {
+      this[tab].classList.remove(SELECTED_TAB_IDENTIFIER_CLASS);
+    });
+  }
+
+  function showTabContent(tab) {
+    this[`${tab}Content`].style.display = "flex";
+  }
+
+  function hideAllTabsContent() {
+    NAVIGATION_TABS.forEach((tab) => {
+      this[`${tab}Content`].style.display = "none";
+    });
+  }
+
+  // ===== Form field toggles
+  function switchOnOrOffRTLBoard() {
+    const rtlEnabled = this.rtlEnabled.checked;
+
+    this.rtlEnabledBoardPicker.style.display = rtlEnabled ? "flex" : "none";
+  }
+
+  function switchOnOrOffVueComponentSettings() {
+    const vueSettingsEnabled = this.exportFormat.value === "Vue";
+
+    this.vueComponentSettings.style.display = vueSettingsEnabled
+      ? "none"
+      : "flex";
+    this.vueComponentSettings.style.display = vueSettingsEnabled
+      ? "flex"
+      : "none";
+  }
+
+  // ===== Persistency
+  function setInitialValues(store) {
+    this.exportFormat.value = store.exportFormat;
+    this.rtlEnabled.checked = store.rtlEnabled;
+    this.destinationFolder.value = store.destinationFolder;
+    this.repositoryName.value = store.repositoryName;
+    this.repositoryOwner.value = store.repositoryOwner;
+    this.githubAccessToken.value = store.githubAccessToken;
+  }
+
+  function persistFieldValue({ field, value }) {
+    parent.postMessage(
+      {
+        pluginMessage: {
+          event: "persist-to-storage",
+          field,
+          value,
+        },
+      },
+      "*"
+    );
+  }
+
+  // ===== Event Listeners
+  function registerTabNavigationEventListeners() {
+    NAVIGATION_TABS.forEach((tab) => {
+      this[tab].onclick = function () {
+        resetSelectedTabIndicator();
+        hideAllTabsContent();
+
+        this.classList.add(SELECTED_TAB_IDENTIFIER_CLASS);
+        showTabContent(this.id);
+      };
+    });
+  }
+
+  function registerFormEventListeners() {
+    this.rtlEnabled.addEventListener("change", (event) => {
+      switchOnOrOffRTLBoard();
+      persistFieldValue({
+        field: "rtl-enabled",
+        value: this.rtlEnabled.checked,
+      });
+    });
+
+    this.exportFormat.addEventListener("change", (event) => {
+      switchOnOrOffVueComponentSettings();
+      persistFieldValue({
+        field: "export-format",
+        value: this.exportFormat.value,
+      });
+    });
+
+    this.repositoryOwner.addEventListener("input", (event) => {
+      persistFieldValue({
+        field: "repository-owner",
+        value: this.repositoryOwner.value,
+      });
+    });
+
+    this.repositoryName.addEventListener("input", (event) => {
+      persistFieldValue({
+        field: "repository-name",
+        value: this.repositoryName.value,
+      });
+    });
+
+    this.destinationFolder.addEventListener("input", (event) => {
+      persistFieldValue({
+        field: "destination-folder",
+        value: this.destinationFolder.value,
+      });
+    });
+
+    this.githubAccessToken.addEventListener("input", (event) => {
+      persistFieldValue({
+        field: "github-access-token",
+        value: this.githubAccessToken.value,
+      });
+    });
+  }
+
+  function registerExportButtonEventListener() {
+    this.exportAssetsButton.onclick = () => {
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: "export-assets",
+          },
+        },
+        "*"
+      );
+    };
+  }
+
+  // ===== Lifecycle
+  preSelectFirstTab();
+  registerTabNavigationEventListeners();
+  registerExportButtonEventListener();
+
+  // Wait for initial client settings
+  onmessage = (event) => {
+    setInitialValues(event.data.pluginMessage.storage);
+
+    switchOnOrOffRTLBoard();
+    switchOnOrOffVueComponentSettings();
+    registerFormEventListeners();
+  };
+</script>
+
+<style>
+  :root {
+    --font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+      "Lucida Sans", Arial, sans-serif;
+    --main-color: #000;
+    --void-color: #fff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    padding: 0;
+    margin: 0;
+    font-family: var(--font-family);
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .etg-navigation {
+    display: flex;
+    width: 100%;
+    border-bottom: 1px solid var(--main-color);
+  }
+
+  .etg-navigation button {
+    color: var(--main-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  .etg-navigation .selected-tab {
+    border-bottom: 2px solid var(--main-color);
+    font-weight: 600;
+  }
+
+  .tab-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 12px;
+  }
+
+  .content-group:not(.inline) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content-group.inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  h6 {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    color: #bcbcbc;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+  }
+
+  h6:first-child {
+    margin-top: 0;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    width: calc(50% - 4px);
+  }
+
+  label {
+    margin-bottom: 6px;
+    font-size: 11.5px;
+    letter-spacing: 0.03em;
+    color: #bcbcbc;
+  }
+
+  label[for] {
+    cursor: pointer;
+  }
+
+  input,
+  select {
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #bcbcbc;
+    border-radius: 3px;
+    outline: none;
+  }
+
+  button {
+    padding: 10px 18px;
+    background-color: var(--main-color);
+    color: var(--void-color);
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .etg-footer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 8px;
+  }
+
+  .export-assets-button {
+    font-weight: 600;
+  }
+</style>
