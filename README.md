@@ -28,6 +28,8 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 ---
 
+## Development Guide
+
 ### Pre-requisites:
 
 - Make sure you have Node installed in your machine (v16.16.0 or higher)
@@ -63,6 +65,8 @@ npm run build
 @TODO: Convert repository to public
 
 @TODO: Implement repository security policies
+
+@TODO: Deployment automations
 
 ---
 

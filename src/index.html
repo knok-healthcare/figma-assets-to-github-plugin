@@ -7,7 +7,6 @@
   <main id="assetConfigurationsTabContent" class="tab-content">
     <label>Export as</label>
     <select id="exportFormat" placeholder="End format of the exported assets">
-      <option value="default">Original format</option>
       <option value="SVG">SVG</option>
       <option value="Vue">Vue component</option>
     </select>
@@ -215,6 +214,16 @@
         {
           pluginMessage: {
             event: "export-assets",
+            data: {
+              exportFormat: this.exportFormat.value,
+              figmaBoard: this.figmaBoard.value,
+              rtlEnabled: this.rtlEnabled.checked,
+              figmaRTLBoard: this.figmaRTLBoard.value,
+              repositoryOwner: this.repositoryOwner.value,
+              repositoryName: this.repositoryName.value,
+              destinationFolder: this.destinationFolder.value,
+              githubAccessToken: this.githubAccessToken.value,
+            },
           },
         },
         "*"
