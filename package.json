@@ -2,15 +2,25 @@
   "name": "figma-assets-to-github-plugin",
   "version": "1.0.0",
   "description": "A figma plugin to export assets to a github repository.",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "watch": "npm run build -- --watch"
-  },
   "author": "knok-healthcare",
   "license": "MIT",
+  "packageManager": "pnpm@8.6.5",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "pnpm core:dev && pnpm ui:dev",
+    "ui:dev": "pnpm --filter ui dev",
+    "core:dev": "pnpm --filter core dev",
+    "build": "pnpm core:build && pnpm ui:build",
+    "ui:build": "pnpm --filter ui build",
+    "core:build": "pnpm --filter core build"
+  },
   "devDependencies": {
     "@figma/plugin-typings": "*",
     "typescript": "*"
+  },
+  "engines": {
+    "pnpm": ">= 8.6.5",
+    "npm": ">=8.0.0",
+    "node": ">=16.16.0"
   }
 }

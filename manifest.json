@@ -2,13 +2,13 @@
   "name": "figma-assets-to-github-plugin",
   "id": "1250083994048709468",
   "api": "1.0.0",
-  "main": "dist/index.js",
+  "main": "apps/core/dist/index.js",
+  "ui": "apps/ui/dist/index.html",
   "capabilities": [],
   "enableProposedApi": false,
   "editorType": [
     "figma"
   ],
-  "ui": "src/index.html",
   "networkAccess": {
     "allowedDomains": [
       "none"

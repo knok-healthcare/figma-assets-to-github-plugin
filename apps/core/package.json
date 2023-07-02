@@ -1,0 +1,17 @@
+{
+    "name": "core",
+    "private": true,
+    "description": "Core logic of the plugin that runs outside of the \"browser\" scope.",
+    "main": "dist/index.js",
+    "author": "knok-healthcare",
+    "license": "MIT",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite build --watch"
+    },
+    "devDependencies": {
+        "typescript": "^4.6.4",
+        "vite": "^4.3.9",
+        "vite-plugin-singlefile": "^0.13.5"
+    }
+}

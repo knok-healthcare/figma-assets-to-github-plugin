@@ -10,51 +10,55 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 ---
 
-### How does it work?
-
-1. Install the plugin
-2. Run it
-3. Select the board that contains the icons to export
-4. Select the desired format of the assets (original format, SVG or Vue)
-5. Configure the Github Link:
-
-   5.1. Repository owner (can be a private account name or an organization name)
-
-   5.2. Repository name
-
-   5.3. Access token (token with access to read and create pull requests in the target repository)
-
-   5.4. Destination folder for the assets
-
----
-
-## Development Guide
-
 ### Pre-requisites:
 
 - Make sure you have Node installed in your machine (v16.16.0 or higher)
+- Make sure you have pnpm installed in you machine (v8.6.5 or higher)
+  - To install pnpm run the following command: `npm install -g pnpm`
 
 ---
 
 ### Getting Started:
 
-Installing dependencies:
+**About the repository:**
 
-```
-npm install
-```
+- This repository implements a **"monorepo"** arquitecture using **pnpm workspaces**.
+- There are currently two "apps" inside the monorepo:
+  - **Core:** Main business logic of the plugin that runs outside of the UI context (aka the "back-end" of the plugin).
+  - **UI:** The plugin UI that the user interacts with. (aka the "front-end" of the plugin).
 
-Starting dev server:
+**Available Commands:**
 
-```
-npm run watch
-```
+- Global:
 
-Build the plugin:
+  - Installing dependencies:
 
-```
-npm run build
-```
+    ```
+    pnpm install
+    ```
+
+  - Starting the "dev servers":
+
+    ```
+    pnpm dev
+    ```
+
+  - Build the plugin:
+
+    ```
+    pnpm build
+    ```
+
+- Targeting a specific app or package:
+  - Starting the "dev server" of UI app only:
+    ```
+    pnpm ui:dev
+    ```
+  - Building the UI app only:
+    ```
+    pnpm ui:build
+    ```
+    **Note:** Pnpm allows to run any scripts defined in the package.json of the packages matched by pnpm-workspace.yaml file. You can run these scripts with the command: `pnpm --filter <package_name> <script>`.
 
 ---
 
