@@ -12,6 +12,7 @@ import {
   getComponentsFromPanel,
 } from "../utils/figma";
 import { hasRequiredDataForExport } from "../utils/validators";
+import GithubConnector from "github-connector";
 
 export default async (data: ClientStorage) => {
   try {
@@ -70,12 +71,61 @@ export default async (data: ClientStorage) => {
 
     if (data.exportFormat === "Vue") {
       componentsToExport = getSFCs(componentsToExport);
-    }
+      console.log(componentsToExport);
 
-    // @TODO: Open pull request in the Github repository configured through the UI
-    // (this part can be a specific package "packages/github-connetor")
-    console.log(componentsToExport);
+      const github = new GithubConnector({
+        repositoryOwner: data.repositoryOwner,
+        repositoryName: data.repositoryName,
+        accessToken: data.accessToken,
+      });
+
+      const files = await Promise.all(
+        Object.keys(componentsToExport).map((componentName: string) => {
+          const component = componentsToExport[componentName];
+
+          return github.createFile({
+            name: componentName,
+            extension: "vue",
+            content: component.code,
+            encoding: "utf-8",
+          });
+        })
+      );
+
+      const baseBranchName = "main";
+      const baseBranch = await github.getBranchByName(baseBranchName);
+      if (!baseBranch)
+        throw new Error(
+          "Specified base branch not found. Make sure the branch exists and try again."
+        );
+
+      const fileTree = await github.createFileTree(
+        files,
+        data.destinationFolder,
+        baseBranch?.object.sha
+      );
+
+      const commit = await github.createCommit(
+        "example message",
+        fileTree.sha,
+        baseBranch.object.sha
+      );
+
+      await github.createOrUpdateBranch(data.targetBranch, commit.sha);
+
+      const pullRequests = await github.getPullRequestsByBranchName(
+        data.targetBranch
+      );
+      if (!pullRequests || pullRequests.length === 0) {
+        const createdPullRequest = await github.openPullRequest({
+          baseBranch: baseBranchName,
+          headBranch: data.targetBranch,
+        });
+      }
+    }
+  } catch (error) {
+    console.log("error: ", error);
   } finally {
-    figma.closePlugin();
+    // figma.closePlugin();
   }
 };

@@ -29,7 +29,7 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 **Available Commands:**
 
-- Global:
+- Generic:
 
   - Installing dependencies:
 
@@ -62,15 +62,15 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 ---
 
-@TODO: Contribution guide
-
+@TODO: Eslint+Prettier config
+@TODO: Stylelint config
+@TODO: Recommendend vscode extensions
 @TODO: License file
-
+@TODO: Contribution guide
 @TODO: Convert repository to public
-
 @TODO: Implement repository security policies
-
-@TODO: Deployment automations
+@TODO: Unit & e2e tests
+@TODO: CI & CD
 
 ---
 

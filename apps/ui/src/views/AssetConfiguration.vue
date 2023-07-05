@@ -54,6 +54,7 @@
 <script lang="ts">
 import InputGroup from "@/components/Forms/InputGroup.vue";
 import { useFigmaStore } from "../stores/figma";
+import type { ClientStorage } from "../stores/figma";
 import { storeToRefs } from "pinia";
 
 export default {
@@ -73,14 +74,14 @@ export default {
   },
 
   methods: {
-    onChange(field: keyof typeof this.clientStorage, event: Event) {
+    onChange(field: keyof ClientStorage, event: Event) {
       this.updateClientStorageField(
         field,
         (event.target as HTMLInputElement).value
       );
     },
 
-    onCheckboxChange(field: keyof typeof this.clientStorage, event: Event) {
+    onCheckboxChange(field: keyof ClientStorage, event: Event) {
       this.updateClientStorageField(
         field,
         (event.target as HTMLInputElement).checked

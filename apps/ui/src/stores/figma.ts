@@ -1,6 +1,17 @@
 import { defineStore } from "pinia";
 
 export type ExportableFormat = "SVG" | "Vue";
+export type ClientStorage = {
+  exportFormat: ExportableFormat;
+  rtlEnabled: boolean;
+  selectedBoardId: string;
+  selectedRTLBoardId: string;
+  accessToken: string;
+  repositoryOwner: string;
+  repositoryName: string;
+  targetBranch: string;
+  destinationFolder: string;
+};
 
 export const useFigmaStore = defineStore("figma", {
   state: () => ({
@@ -40,10 +51,7 @@ export const useFigmaStore = defineStore("figma", {
     },
 
     /** Updates the value of a specific field of the figma client storage */
-    updateClientStorageField(
-      field: keyof typeof this.clientStorage,
-      value: any
-    ) {
+    updateClientStorageField(field: keyof ClientStorage, value: any) {
       Object.assign(this.clientStorage, { [field]: value });
 
       // Propagates the event to the Figma "back-end" handler
