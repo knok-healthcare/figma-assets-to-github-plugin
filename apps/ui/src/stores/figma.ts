@@ -1,17 +1,5 @@
 import { defineStore } from "pinia";
-
-export type ExportableFormat = "SVG" | "Vue";
-export type ClientStorage = {
-  exportFormat: ExportableFormat;
-  rtlEnabled: boolean;
-  selectedBoardId: string;
-  selectedRTLBoardId: string;
-  accessToken: string;
-  repositoryOwner: string;
-  repositoryName: string;
-  targetBranch: string;
-  destinationFolder: string;
-};
+import type { ClientStorage, ExportableFormat } from "../../../../types";
 
 export const useFigmaStore = defineStore("figma", {
   state: () => ({

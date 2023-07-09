@@ -9,6 +9,7 @@ import {
   NewBranchDto,
   NewPullRequestDto,
   ExportFilesDto,
+  File,
 } from "./types";
 import type { GetRefEndpoint } from "./services/Refs";
 import Pulls from "./services/Pulls";
@@ -39,8 +40,8 @@ export default class GithubConnector {
     return {
       name,
       extension,
-      url: file.url,
-      sha: file.sha,
+      url: file?.url,
+      sha: file?.sha,
     };
   }
 
@@ -197,19 +198,27 @@ export default class GithubConnector {
     components,
     extension,
     destinationFolder,
+    commitMessage,
   }: ExportFilesDto) {
-    const files = await Promise.all(
-      Object.keys(components).map((componentName: string) => {
-        const component = components[componentName];
+    let files: File[] = [];
 
-        return this.createFile({
-          name: componentName,
-          extension: extension,
-          content: component,
-          encoding: "utf-8",
-        });
-      })
-    );
+    const componentNames = Object.keys(components);
+    for (let i = 0; i < componentNames.length; i++) {
+      const componentName = componentNames[i];
+      const component = components[componentName];
+
+      // note: this can't be fully paralelized because of a browser
+      //       simultaneous request rate limiter.
+      //       @TODO: Split this into chunks and perform X requests in parallel at a time
+      const file = await this.createFile({
+        name: componentName,
+        extension: extension,
+        content: component,
+        encoding: "utf-8",
+      });
+
+      files.push(file);
+    }
 
     const baseBranch = await this.getBranchByName(baseBranchName);
     if (!baseBranch)
@@ -224,7 +233,7 @@ export default class GithubConnector {
     );
 
     const commit = await this.createCommit(
-      "example message",
+      commitMessage,
       fileTree.sha,
       baseBranch.object.sha
     );

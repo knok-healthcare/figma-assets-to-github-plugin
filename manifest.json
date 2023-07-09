@@ -12,6 +12,7 @@
   "networkAccess": {
     "allowedDomains": [
       "https://api.github.com"
-    ]
+    ],
+    "reasoning": "Uses the Github API to export the assets to a repository (creating blobs, trees, branch refs and pull requests)."
   }
 }

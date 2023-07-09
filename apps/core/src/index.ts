@@ -6,7 +6,7 @@
 // This file holds the main bootstrapping logic for the plugin.
 // (Note: Any logic that depends on browser API's should be placed in the UI files and not here.)
 
-import type { ClientStorage } from "./types/storage";
+import type { ClientStorage } from "../../../types";
 import type { PostMessageEvent } from "./types/events";
 
 import {
@@ -88,10 +88,11 @@ async function exportAssets(data: ClientStorage) {
     });
 
     await github.exportFiles({
-      baseBranchName: "main",
-      headBranchName: data.targetBranch,
+      baseBranchName: data.targetBranch,
+      headBranchName: PluginConfig.github.headBranch,
       components: exportableComponents,
       extension: data.exportFormat === "SVG" ? "svg" : "vue",
+      commitMessage: PluginConfig.github.commitMessage,
       destinationFolder: data.destinationFolder,
     });
   } catch (error) {

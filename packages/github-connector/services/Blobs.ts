@@ -7,7 +7,6 @@ export type CreateBlobEndpoint =
 export default {
   createBlob: async (params: CreateBlobEndpoint["parameters"]) => {
     type ResponseType = CreateBlobEndpoint["response"]["data"];
-
     const response = await API.request<ResponseType>(
       `repos/${params.owner}/${params.repo}/git/blobs`,
       {

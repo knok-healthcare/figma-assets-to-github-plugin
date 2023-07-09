@@ -41,6 +41,8 @@ export type ExportFilesDto = {
   extension: string;
   /** Array of figma components to export */
   components: Record<string, string>;
+  /** Default commit message */
+  commitMessage: string;
   /**
    * The destination folder inside the target repository,
    * example: `src/assets/icons`.
@@ -48,4 +50,15 @@ export type ExportFilesDto = {
    * Note: **Cannot be an absolute path** (starting with a /).
    */
   destinationFolder: string;
+};
+
+export type File = {
+  /** Name of the file that will be created */
+  name: string;
+  /** Extension of the file that will be created */
+  extension: string;
+  /** Blob SHA from Github, received after creation */
+  sha: string;
+  /** Blob URL from Github, received after creation */
+  url: string;
 };

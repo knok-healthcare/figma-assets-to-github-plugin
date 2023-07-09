@@ -10,8 +10,8 @@
         "dev": "vue-tsc --noEmit && vite build --watch"
     },
     "dependencies": {
-        "vue": "^3.3.4",
-        "pinia": "^2.1.4"
+        "pinia": "^2.1.4",
+        "vue": "^3.3.4"
     },
     "devDependencies": {
         "@types/node": "^20.3.3",

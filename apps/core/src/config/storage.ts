@@ -1,4 +1,4 @@
-import type { ClientStorage } from "../types/storage";
+import type { ClientStorage } from "../../../../types";
 
 export const ClientStorageProps: {
   name: keyof ClientStorage;
