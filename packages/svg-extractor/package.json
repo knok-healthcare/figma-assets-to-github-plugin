@@ -1,0 +1,14 @@
+{
+    "name": "@packages/svg-extractor",
+    "description": "Package responsible for retrieving all figma components as final SVG's",
+    "private": true,
+    "main": "index.ts",
+    "author": "knok-healthcare",
+    "license": "MIT",
+    "dependencies": {
+        "@packages/utils": "*"
+    },
+    "devDependencies": {
+        "typescript": "^4.6.4"
+    }
+}

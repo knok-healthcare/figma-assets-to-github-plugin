@@ -6,3 +6,7 @@ export type VueProp = {
 export type VuePropMap = {
   [propName: string]: VueProp;
 };
+
+export type FigmaComponentProperties = {
+  [name: string]: string;
+};

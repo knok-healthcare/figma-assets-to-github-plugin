@@ -1,80 +1,45 @@
-import { toCamelCase } from "./casing";
+import { ClientStorageProps } from "../config/storage";
 
-export const persistValueToStorage = async ({
-  field,
-  value,
-}: {
-  field: string;
-  value: any;
-}) => {
-  await figma.clientStorage.setAsync(field, value);
-};
+/** Searches the client storage for the saved values of the plugin */
+export async function getStoredValues() {
+  const values = {} as Record<string, unknown>;
 
-export const getStorage = async () => {
-  const exportFormat =
-    (await figma.clientStorage.getAsync("exportFormat")) || "default";
-  const destinationFolder =
-    (await figma.clientStorage.getAsync("destinationFolder")) || "";
-  const rtlEnabled =
-    (await figma.clientStorage.getAsync("rtlEnabled")) || false;
-  const repositoryOwner =
-    (await figma.clientStorage.getAsync("repositoryOwner")) || "";
-  const repositoryName =
-    (await figma.clientStorage.getAsync("repositoryName")) || "";
-  const targetBranch =
-    (await figma.clientStorage.getAsync("targetBranch")) || "";
-  const accessToken = (await figma.clientStorage.getAsync("accessToken")) || "";
+  for (let i = 0; i < ClientStorageProps.length; i++) {
+    const prop = ClientStorageProps[i];
+    const value = await figma.clientStorage.getAsync(prop.name);
 
-  return {
-    exportFormat,
-    destinationFolder,
-    rtlEnabled,
-    repositoryOwner,
-    repositoryName,
-    targetBranch,
-    accessToken,
-  };
-};
+    values[prop.name] = value || prop.defaultValue;
+  }
 
-export const getAvailablePanels = () => {
+  return values;
+}
+
+/** Returns all panels inside the selected figma page */
+export function getAvailablePanels() {
   return figma.currentPage.children as ComponentSetNode[];
-};
+}
 
-export const getComponentsFromPanel = (panel: ComponentSetNode) => {
+/** Get all components inside a specific panel */
+export function getComponentsFromPanel(panel: ComponentSetNode) {
   return panel.children as ComponentNode[];
-};
+}
 
-// @TODO: Allow the UI to customize the properties to exclude
-export const filterComponentProperties = (componentProperties: {
-  [name: string]: string;
-}) => {
-  const filteredProperties = {} as any;
+/** Returns all components */
+export function getAllComponents() {
+  const panels = getAvailablePanels();
+  if (!panels) throw new Error("No panels were found in your current page.");
 
-  Object.keys(componentProperties).forEach((key) => {
-    if (["Name"].indexOf(key) === -1) {
-      filteredProperties[key] = componentProperties[key];
-    }
+  return panels.flatMap((panel) => {
+    return getComponentsFromPanel(panel);
   });
+}
 
-  return filteredProperties;
-};
+/** Get all components inside specified panels by their panel id's */
+export function getComponentsByPanelIds(ids: string[]) {
+  const panels = getAvailablePanels().filter((panel) => ids.includes(panel.id));
+  if (!panels) throw new Error("Panels not found.");
 
-export const componentPropertiesAsConditionString = (componentProperties: {
-  [name: string]: string;
-}) => {
-  let str = "";
-
-  Object.keys(componentProperties).forEach((key) => {
-    if (str !== "") str += " && ";
-
-    str += toCamelCase(key) + " === '" + componentProperties[key] + "'";
+  return panels.flatMap((panel) => {
+    return getComponentsFromPanel(panel);
   });
-
-  return str;
-};
-
-export const exportComponentAsSVG = async (component: ComponentNode) => {
-  return await component.exportAsync({
-    format: "SVG_STRING",
-  });
-};
+}

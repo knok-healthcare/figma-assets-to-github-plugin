@@ -12,6 +12,10 @@ export default {
       `repos/${params.owner}/${params.repo}/pulls`,
       {
         method: "GET",
+        query: {
+          state: params.state as string,
+          head: params.head as string,
+        },
       }
     );
 

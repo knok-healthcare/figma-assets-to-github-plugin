@@ -1,6 +1,6 @@
-import type { ClientStorage } from "../../types/ClientStorage";
+import type { ClientStorage } from "../index.d";
 
-export const hasRequiredDataForExport = (payload: ClientStorage) => {
+export const checkRequiredDataForExport = (payload: ClientStorage) => {
   const missingValueMessage = (fieldName: string) =>
     `Missing required value for field "${fieldName}". Please fill in the field and try again.`;
 

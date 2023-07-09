@@ -18,10 +18,14 @@ export default {
     this.headers.Authorization = "Bearer " + accessToken;
   },
 
-  async request<T>(url: string, options: RequestInit): Promise<T> {
+  async request<T>(
+    url: string,
+    options: RequestInit & { query?: Record<string, string> }
+  ): Promise<T> {
+    const query = options.query ? buildQuery(options.query) : "";
     const headers = Object.assign(this.headers, options.headers);
 
-    const response = await fetch(`${config.api.url}/${url}`, {
+    const response = await fetch(`${config.api.url}/${url}` + query, {
       method: options.method,
       body: options.body,
       headers,
@@ -32,3 +36,14 @@ export default {
     return (await response.json()) as T;
   },
 };
+
+function buildQuery(parameters: Record<string, string>) {
+  return (
+    "?" +
+    Object.keys(parameters)
+      .map((k) => {
+        return encodeURIComponent(k) + "=" + encodeURIComponent(parameters[k]);
+      })
+      .join("&")
+  );
+}

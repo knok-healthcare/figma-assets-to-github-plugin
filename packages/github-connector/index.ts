@@ -8,6 +8,7 @@ import {
   CreateBlobDto,
   NewBranchDto,
   NewPullRequestDto,
+  ExportFilesDto,
 } from "./types";
 import type { GetRefEndpoint } from "./services/Refs";
 import Pulls from "./services/Pulls";
@@ -160,6 +161,7 @@ export default class GithubConnector {
   async getPullRequestsByBranchName(branchName: string) {
     if (!branchName) throw new Error("Missing required branch name parameter.");
 
+    console.log("searching for PR from branch: ", branchName);
     const pullRequests = Pulls.listPullRequests({
       owner: this.repositoryOwner,
       repo: this.repositoryName,
@@ -187,5 +189,54 @@ export default class GithubConnector {
     });
 
     return pullRequest;
+  }
+
+  async exportFiles({
+    baseBranchName,
+    headBranchName,
+    components,
+    extension,
+    destinationFolder,
+  }: ExportFilesDto) {
+    const files = await Promise.all(
+      Object.keys(components).map((componentName: string) => {
+        const component = components[componentName];
+
+        return this.createFile({
+          name: componentName,
+          extension: extension,
+          content: component,
+          encoding: "utf-8",
+        });
+      })
+    );
+
+    const baseBranch = await this.getBranchByName(baseBranchName);
+    if (!baseBranch)
+      throw new Error(
+        "Specified base branch not found. Make sure the branch exists and try again."
+      );
+
+    const fileTree = await this.createFileTree(
+      files,
+      destinationFolder,
+      baseBranch?.object.sha
+    );
+
+    const commit = await this.createCommit(
+      "example message",
+      fileTree.sha,
+      baseBranch.object.sha
+    );
+
+    await this.createOrUpdateBranch(headBranchName, commit.sha);
+
+    const pullRequests = await this.getPullRequestsByBranchName(headBranchName);
+    if (!pullRequests || pullRequests.length === 0) {
+      return await this.openPullRequest({
+        baseBranch: baseBranchName,
+        headBranch: headBranchName,
+      });
+    }
   }
 }

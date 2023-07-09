@@ -16,10 +16,17 @@ importers:
         version: 5.1.6
 
   apps/core:
-    devDependencies:
-      github-connector:
+    dependencies:
+      '@packages/github-connector':
         specifier: '*'
         version: link:../../packages/github-connector
+      '@packages/svg-extractor':
+        specifier: '*'
+        version: link:../../packages/svg-extractor
+      '@packages/vue-extractor':
+        specifier: '*'
+        version: link:../../packages/vue-extractor
+    devDependencies:
       typescript:
         specifier: ^4.6.4
         version: 4.6.4
@@ -66,6 +73,32 @@ importers:
       '@octokit/types':
         specifier: ^10.0.0
         version: 10.0.0
+      typescript:
+        specifier: ^4.6.4
+        version: 4.6.4
+
+  packages/svg-extractor:
+    dependencies:
+      '@packages/utils':
+        specifier: '*'
+        version: link:../utils
+    devDependencies:
+      typescript:
+        specifier: ^4.6.4
+        version: 4.6.4
+
+  packages/utils:
+    devDependencies:
+      typescript:
+        specifier: ^4.6.4
+        version: 4.6.4
+
+  packages/vue-extractor:
+    dependencies:
+      '@packages/utils':
+        specifier: '*'
+        version: link:../utils
+    devDependencies:
       typescript:
         specifier: ^4.6.4
         version: 4.6.4
