@@ -77,7 +77,7 @@ import Row from "@/components/Grid/Row.vue";
 import Column from "@/components/Grid/Column.vue";
 import InputGroup from "../components/Forms/InputGroup.vue";
 import { useFigmaStore } from "../stores/figma";
-import type { ClientStorage } from "../stores/figma";
+import type { ClientStorage } from "../../../../types";
 import { storeToRefs } from "pinia";
 
 export default {
