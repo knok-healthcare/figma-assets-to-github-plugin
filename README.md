@@ -4,12 +4,6 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 ---
 
-### Demo
-
-@TODO: Demo video exporting assets to a dummy repository
-
----
-
 ### Pre-requisites:
 
 - Make sure you have Node installed in your machine (v16.16.0 or higher)
@@ -62,15 +56,9 @@ This plugin adds the ability to export figma assets (icons) to a github reposito
 
 ---
 
-@TODO: Eslint+Prettier config
-@TODO: Stylelint config
-@TODO: Recommendend vscode extensions
-@TODO: License file
-@TODO: Contribution guide
-@TODO: Convert repository to public
-@TODO: Implement repository security policies
-@TODO: Unit & e2e tests
-@TODO: CI & CD
+### Contribution Guide:
+
+Read our [contribution guide](./CONTRIBUTING.md) for more details on how to contribute to this project.
 
 ---
 

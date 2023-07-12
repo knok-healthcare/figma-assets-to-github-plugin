@@ -2,3 +2,5 @@
 *.tsx
 *.js
 *.jsx
+*.md
+*.mdx
