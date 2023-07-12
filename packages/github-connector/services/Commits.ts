@@ -1,40 +1,38 @@
-import { Endpoints } from "@octokit/types";
-import API from "../Api";
+import { Endpoints } from '@octokit/types'
+import API from '../Api'
 
-export type GetCommitEndpoint =
-  Endpoints["GET /repos/{owner}/{repo}/commits/{ref}"];
-export type CreateCommitEndpoint =
-  Endpoints["POST /repos/{owner}/{repo}/git/commits"];
+export type GetCommitEndpoint = Endpoints['GET /repos/{owner}/{repo}/commits/{ref}']
+export type CreateCommitEndpoint = Endpoints['POST /repos/{owner}/{repo}/git/commits']
 
 export default {
-  getCommit: async (params: GetCommitEndpoint["parameters"]) => {
-    type ResponseType = GetCommitEndpoint["response"]["data"];
+  getCommit: async (params: GetCommitEndpoint['parameters']) => {
+    type ResponseType = GetCommitEndpoint['response']['data']
 
     const response = await API.request<ResponseType>(
       `repos/${params.owner}/${params.repo}/commits/${params.ref}`,
       {
-        method: "GET",
+        method: 'GET',
       }
-    );
+    )
 
-    return response;
+    return response
   },
 
-  createCommit: async (params: CreateCommitEndpoint["parameters"]) => {
-    type ResponseType = CreateCommitEndpoint["response"]["data"];
+  createCommit: async (params: CreateCommitEndpoint['parameters']) => {
+    type ResponseType = CreateCommitEndpoint['response']['data']
 
     const response = await API.request<ResponseType>(
       `repos/${params.owner}/${params.repo}/git/commits`,
       {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
           message: params.message,
           tree: params.tree,
           parents: params.parents,
         }),
       }
-    );
+    )
 
-    return response;
+    return response
   },
-};
+}

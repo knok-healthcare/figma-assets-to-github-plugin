@@ -6,50 +6,47 @@
 // This file holds the main bootstrapping logic for the plugin.
 // (Note: Any logic that depends on browser API's should be placed in the UI files and not here.)
 
-import type { ClientStorage } from "../../../types";
-import type { PostMessageEvent } from "./types/events";
+import type { ClientStorage } from '../../../types'
+import type { PostMessageEvent } from './types/events'
 
-import {
-  getStoredValues,
-  getComponentsByPanelIds,
-  getAllComponents,
-} from "./utils/figma";
-import { checkRequiredDataForExport } from "./utils/validators";
-import PluginConfig from "./config/plugin";
-import SvgExtractor from "@packages/svg-extractor";
-import VueExtractor from "@packages/vue-extractor";
-import GithubConnector from "@packages/github-connector";
+import { getStoredValues, getComponentsByPanelIds, getAllComponents } from './utils/figma'
+import { checkRequiredDataForExport } from './utils/validators'
+import PluginConfig from './config/plugin'
+import SvgExtractor from '@packages/svg-extractor'
+import VueExtractor from '@packages/vue-extractor'
+import GithubConnector from '@packages/github-connector'
 
 // Only proceeds to "mount" the plugin after necessary data has been retrieved
-getStoredValues().then((storage) => {
+getStoredValues().then(storage => {
   // Register handler for post message event
-  figma.ui.onmessage = onMessageEvent;
+  figma.ui.onmessage = onMessageEvent
 
   // Render the UI from the plugin
-  figma.showUI(__html__, PluginConfig.window);
+  figma.showUI(__html__, PluginConfig.window)
 
   // Send the client settings to the rendered UI
-  figma.ui.postMessage({ storage });
-});
+  figma.ui.postMessage({ storage })
+})
 
 /** Handles a postMessage event sent from the UI */
 async function onMessageEvent(payload: PostMessageEvent) {
-  if (payload.event === "update-client-storage-field") {
+  if (payload.event === 'update-client-storage-field') {
     if (!payload.field) {
-      const error = `Missing required "field" property for event "update-client-storage-field".`;
-      throw new Error(error);
+      const error =
+        'Missing required "field" property for event "update-client-storage-field".'
+      throw new Error(error)
     }
 
-    return await figma.clientStorage.setAsync(payload.field, payload.value);
+    return await figma.clientStorage.setAsync(payload.field, payload.value)
   }
 
-  if (payload.event === "export-assets") {
+  if (payload.event === 'export-assets') {
     if (!payload.data) {
-      const error = `Missing required "data" property for event "export-assets".`;
-      throw new Error(error);
+      const error = 'Missing required "data" property for event "export-assets".'
+      throw new Error(error)
     }
 
-    return await exportAssets(payload.data);
+    return await exportAssets(payload.data)
   }
 }
 
@@ -57,27 +54,24 @@ async function onMessageEvent(payload: PostMessageEvent) {
 async function exportAssets(data: ClientStorage) {
   try {
     // Make sure all necessary data was filled otherwise it throws
-    checkRequiredDataForExport(data);
+    checkRequiredDataForExport(data)
 
     // Get all figma components
-    let figmaComponents;
-    if (!data.selectedBoardId) figmaComponents = getAllComponents();
+    let figmaComponents
+    if (!data.selectedBoardId) figmaComponents = getAllComponents()
     else {
       figmaComponents = data.rtlEnabled
-        ? getComponentsByPanelIds([
-            data.selectedBoardId,
-            data.selectedRTLBoardId,
-          ])
-        : getComponentsByPanelIds([data.selectedBoardId]);
+        ? getComponentsByPanelIds([data.selectedBoardId, data.selectedRTLBoardId])
+        : getComponentsByPanelIds([data.selectedBoardId])
     }
 
     // Build final object with all components to export to Github
-    let exportableComponents: Record<string, string> = {};
+    let exportableComponents: Record<string, string> = {}
 
-    if (data.exportFormat === "SVG") {
-      exportableComponents = await SvgExtractor.extract(figmaComponents);
-    } else if (data.exportFormat === "Vue") {
-      exportableComponents = await VueExtractor.extract(figmaComponents);
+    if (data.exportFormat === 'SVG') {
+      exportableComponents = await SvgExtractor.extract(figmaComponents)
+    } else if (data.exportFormat === 'Vue') {
+      exportableComponents = await VueExtractor.extract(figmaComponents)
     }
 
     // Export the components
@@ -85,17 +79,18 @@ async function exportAssets(data: ClientStorage) {
       repositoryOwner: data.repositoryOwner,
       repositoryName: data.repositoryName,
       accessToken: data.accessToken,
-    });
+    })
 
     await github.exportFiles({
       baseBranchName: data.targetBranch,
       headBranchName: PluginConfig.github.headBranch,
       components: exportableComponents,
-      extension: data.exportFormat === "SVG" ? "svg" : "vue",
+      extension: data.exportFormat === 'SVG' ? 'svg' : 'vue',
       commitMessage: PluginConfig.github.commitMessage,
       destinationFolder: data.destinationFolder,
-    });
+    })
   } catch (error) {
-    console.error(error);
+    // eslint-disable-next-line no-console
+    console.error(error)
   }
 }

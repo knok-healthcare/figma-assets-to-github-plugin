@@ -1,12 +1,14 @@
 <template>
-  <div class="input-group" :data-inline="inline">
+  <div
+    class="input-group"
+    :data-inline="inline">
     <slot></slot>
   </div>
 </template>
 
 <script lang="ts">
 export default {
-  name: "InputGroup",
+  name: 'InputGroup',
 
   props: {
     inline: {
@@ -14,18 +16,18 @@ export default {
       default: false,
     },
   },
-};
+}
 </script>
 
 <style lang="scss">
 .input-group {
   display: flex;
 
-  &[data-inline="false"] {
+  &[data-inline='false'] {
     flex-direction: column;
   }
 
-  &[data-inline="true"] {
+  &[data-inline='true'] {
     flex-direction: row;
     align-items: center;
     margin-bottom: 8px;
@@ -34,8 +36,8 @@ export default {
   label {
     margin-bottom: 6px;
     font-size: 11.5px;
-    letter-spacing: 0.03em;
     color: #bcbcbc;
+    letter-spacing: 0.03em;
   }
 
   label[for] {
@@ -44,8 +46,8 @@ export default {
 
   input,
   select {
-    margin-bottom: 10px;
     padding: 8px;
+    margin-bottom: 10px;
     border: 1px solid #bcbcbc;
     border-radius: 3px;
     outline: none;

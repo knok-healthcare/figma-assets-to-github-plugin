@@ -2,9 +2,7 @@
   <TabView :tabs="tabs">
     <template #default="{ selectedTab }">
       <AssetConfiguration v-if="selectedTab === 'asset-configurations'" />
-      <GithubConfiguration
-        v-else-if="selectedTab === 'github-configurations'"
-      />
+      <GithubConfiguration v-else-if="selectedTab === 'github-configurations'" />
     </template>
 
     <template #footer>
@@ -20,14 +18,14 @@
 </template>
 
 <script lang="ts">
-import TabView from "@/components/Navigation/TabView.vue";
-import AssetConfiguration from "@/views/AssetConfiguration.vue";
-import GithubConfiguration from "@/views/GithubConfiguration.vue";
-import { useFigmaStore } from "@/stores/figma";
-import { storeToRefs } from "pinia";
+import TabView from '@/components/Navigation/TabView.vue'
+import AssetConfiguration from '@/views/AssetConfiguration.vue'
+import GithubConfiguration from '@/views/GithubConfiguration.vue'
+import { useFigmaStore } from '@/stores/figma'
+import { storeToRefs } from 'pinia'
 
 export default {
-  name: "App",
+  name: 'App',
 
   components: {
     TabView,
@@ -36,28 +34,34 @@ export default {
     GithubConfiguration,
   },
 
-  computed: {
-    tabs() {
-      return [
-        { id: "asset-configurations", label: "Assets" },
-        { id: "github-configurations", label: "Github" },
-      ];
-    },
-  },
-
   setup() {
-    const figma = useFigmaStore();
-    const { clientStorage } = storeToRefs(figma);
+    const figma = useFigmaStore()
+    const { clientStorage } = storeToRefs(figma)
 
     // Wait for a postMessage from the parent to
     // set the initial values from the client storage
-    onmessage = (event) => {
-      figma.setClientStorage(event.data.pluginMessage.storage);
-    };
+    onmessage = event => {
+      figma.setClientStorage(event.data.pluginMessage.storage)
+    }
 
     return {
       clientStorage,
-    };
+    }
+  },
+
+  computed: {
+    tabs() {
+      return [
+        {
+          id: 'asset-configurations',
+          label: 'Assets',
+        },
+        {
+          id: 'github-configurations',
+          label: 'Github',
+        },
+      ]
+    },
   },
 
   methods: {
@@ -67,21 +71,21 @@ export default {
       parent.postMessage(
         {
           pluginMessage: {
-            event: "export-assets",
+            event: 'export-assets',
             data: { ...this.clientStorage },
           },
         },
-        "*"
-      );
+        '*'
+      )
     },
   },
-};
+}
 </script>
 
 <style>
 :root {
-  --font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  --font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans',
+    arial, sans-serif;
   --main-color: #000;
   --void-color: #fff;
 }
@@ -102,9 +106,9 @@ body {
 h6 {
   margin-top: 12px;
   margin-bottom: 12px;
-  text-transform: uppercase;
-  color: #bcbcbc;
   font-weight: bold;
+  color: #bcbcbc;
+  text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
@@ -114,12 +118,12 @@ h6:first-child {
 
 button {
   padding: 10px 18px;
-  background-color: var(--main-color);
+  font-size: 12px;
   color: var(--void-color);
+  cursor: pointer;
+  background-color: var(--main-color);
   border: none;
   border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
 }
 
 .export-assets-button {

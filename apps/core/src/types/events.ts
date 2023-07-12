@@ -1,8 +1,8 @@
-import type { ClientStorage } from "../../../../types";
+import type { ClientStorage } from '../../../../types'
 
 export type PostMessageEvent = {
-  event: "update-client-storage-field" | "export-assets";
-  data: ClientStorage | null;
-  field: string | null;
-  value: any;
-};
+  event: 'update-client-storage-field' | 'export-assets'
+  data: ClientStorage | null
+  field: string | null
+  value: string | boolean | number
+}

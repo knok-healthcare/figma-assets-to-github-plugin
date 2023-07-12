@@ -1,10 +1,10 @@
-import CasingUtils from "./casing";
+import CasingUtils from './casing'
 
 /** Component specific utilities */
 export const components = {
   formatName: function (name: string) {
-    return CasingUtils.toPascalCase(name.replace("/", "Or").replace(".", ""));
+    return CasingUtils.toPascalCase(name.replace('/', 'Or').replace('.', ''))
   },
-};
+}
 
-export default components;
+export default components

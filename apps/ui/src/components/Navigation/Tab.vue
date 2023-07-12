@@ -13,8 +13,6 @@
 export default {
   name: "Tab",
 
-  emits: ["selected"],
-
   props: {
     /** Identifier of the tab element */
     id: {
@@ -35,6 +33,8 @@ export default {
     },
   },
 
+  emits: ["selected"],
+
   methods: {
     onTabClick() {
       this.$emit("selected", this.id);
@@ -45,21 +45,21 @@ export default {
 
 <style lang="scss" scoped>
 .tab-element {
+  padding: 10px 18px;
   color: var(--main-color);
+  cursor: pointer;
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 10px 18px;
-  cursor: pointer;
   transition: background-color 150ms ease-in-out;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgb(0 0 0 / 10%);
   }
 
   &[data-selected="true"] {
-    border-bottom: 2px solid var(--main-color);
     font-weight: 600;
+    border-bottom: 2px solid var(--main-color);
   }
 }
 </style>

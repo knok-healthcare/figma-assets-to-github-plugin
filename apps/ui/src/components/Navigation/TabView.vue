@@ -3,8 +3,8 @@
     <nav class="tab-view--navigation">
       <Tab
         v-for="tab in tabs"
-        :key="tab.id"
         :id="tab.id"
+        :key="tab.id"
         :label="tab.label"
         :selected="tab.id === selectedTab"
         @selected="setSelectedTab"
@@ -12,10 +12,12 @@
     </nav>
 
     <main class="tab-view--content">
-      <slot :selectedTab="selectedTab" />
+      <slot :selected-tab="selectedTab" />
     </main>
 
-    <footer class="tab-view--footer" v-if="!!$slots.footer">
+    <footer
+      v-if="!!$slots.footer"
+      class="tab-view--footer">
       <slot name="footer"></slot>
     </footer>
   </div>
@@ -25,7 +27,7 @@
 import { PropType } from "vue";
 import Tab from "./Tab.vue";
 
-export type Tab = {
+export type TabModel = {
   id: string;
   label: string;
 };
@@ -38,7 +40,7 @@ export default {
   props: {
     /** Array of tabs to render */
     tabs: {
-      type: Array as PropType<Tab[]>,
+      type: Array as PropType<TabModel[]>,
       required: true,
     },
   },
@@ -49,14 +51,14 @@ export default {
     };
   },
 
+  created() {
+    this.selectedTab = this.tabs[0].id;
+  },
+
   methods: {
     setSelectedTab(selectedTab: string) {
       this.selectedTab = selectedTab;
     },
-  },
-
-  created() {
-    this.selectedTab = this.tabs[0].id;
   },
 };
 </script>
@@ -76,8 +78,8 @@ export default {
 
   &--content {
     display: flex;
-    flex-direction: column;
     flex: 1;
+    flex-direction: column;
     padding: 12px;
   }
 

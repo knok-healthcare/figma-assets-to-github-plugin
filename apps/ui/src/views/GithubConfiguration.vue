@@ -1,11 +1,15 @@
 <template>
   <div class="github-configurations">
-    <h6>Repository</h6>
+    <h6>
+      Repository
+    </h6>
 
     <Row>
       <Column>
         <InputGroup>
-          <label for="repositoryOwner">Repository owner</label>
+          <label for="repositoryOwner">
+            Repository owner
+          </label>
           <input
             id="repositoryOwner"
             type="text"
@@ -18,7 +22,9 @@
 
       <Column>
         <InputGroup>
-          <label for="repositoryName">Repository name</label>
+          <label for="repositoryName">
+            Repository name
+          </label>
           <input
             id="repositoryName"
             type="text"
@@ -33,7 +39,9 @@
     <Row>
       <Column>
         <InputGroup>
-          <label for="repositoryBranch">Branch</label>
+          <label for="repositoryBranch">
+            Branch
+          </label>
           <input
             id="repositoryBranch"
             type="text"
@@ -46,7 +54,9 @@
 
       <Column>
         <InputGroup>
-          <label for="destinationFolder">Destination folder</label>
+          <label for="destinationFolder">
+            Destination folder
+          </label>
           <input
             id="destinationFolder"
             type="text"
@@ -58,9 +68,13 @@
       </Column>
     </Row>
 
-    <h6>Authentication</h6>
+    <h6>
+      Authentication
+    </h6>
     <InputGroup>
-      <label for="githubAccessToken">Github access token</label>
+      <label for="githubAccessToken">
+        Github access token
+      </label>
       <input
         id="githubAccessToken"
         type="password"
