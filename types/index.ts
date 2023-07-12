@@ -5,6 +5,10 @@
  */
 export type ExportableFormat = "SVG" | "Vue";
 
+/**
+ * Application settings storied in
+ * figma "clientStorage"
+ */
 export type ClientStorage = {
   /** Defines the format of the files that will be exported. */
   exportFormat: ExportableFormat;

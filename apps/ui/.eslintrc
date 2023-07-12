@@ -1,0 +1,186 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "vue/setup-compiler-macros": true
+  },
+  "extends": [
+    "plugin:vue/vue3-recommended",
+    "eslint:recommended",
+    "@vue/eslint-config-typescript/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "vue/no-unused-vars": "warn",
+    "vue/no-unused-components": "warn",
+    "vue/component-tags-order": [
+      "warn",
+      {
+        "order": ["template", "script", "style"]
+      }
+    ],
+    "vue/attributes-order": [
+      "warn",
+      {
+        "order": [
+          "DEFINITION",
+          "CONDITIONALS",
+          "LIST_RENDERING",
+          "RENDER_MODIFIERS",
+          "GLOBAL",
+          ["UNIQUE", "SLOT"],
+          "TWO_WAY_BINDING",
+          "OTHER_DIRECTIVES",
+          "OTHER_ATTR",
+          "EVENTS",
+          "CONTENT"
+        ],
+        "alphabetical": false
+      }
+    ],
+    "vue/order-in-components": [
+      "warn",
+      {
+        "order": [
+          "el",
+          "name",
+          "key",
+          "parent",
+          "functional",
+          ["delimiters", "comments"],
+          ["components", "directives", "filters"],
+          "extends",
+          "mixins",
+          ["provide", "inject"],
+          "ROUTER_GUARDS",
+          "layout",
+          "middleware",
+          "validate",
+          "scrollToTop",
+          "transition",
+          "loading",
+          "inheritAttrs",
+          "model",
+          ["props", "propsData"],
+          "emits",
+          "setup",
+          "asyncData",
+          "data",
+          "fetch",
+          "head",
+          "computed",
+          "watch",
+          "watchQuery",
+          "LIFECYCLE_HOOKS",
+          "methods",
+          ["template", "render"],
+          "renderError"
+        ]
+      }
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1,
+        "maxEOF": 0
+      }
+    ],
+    "vue/no-multi-spaces": [
+      "error",
+      {
+        "ignoreProperties": false
+      }
+    ],
+    "vue/html-indent": [
+      "error",
+      2,
+      {
+        "attribute": 1,
+        "baseIndent": 1,
+        "closeBracket": 0,
+        "alignAttributesVertically": true,
+        "ignores": []
+      }
+    ],
+    "vue/script-indent": [
+      "error",
+      2,
+      {
+        "baseIndent": 0,
+        "switchCase": 0,
+        "ignores": []
+      }
+    ],
+    "vue/max-attributes-per-line": [
+      "error",
+      {
+        "singleline": {
+          "max": 1
+        },
+        "multiline": {
+          "max": 1
+        }
+      }
+    ],
+    "vue/first-attribute-linebreak": [
+      "error",
+      {
+        "singleline": "beside",
+        "multiline": "below"
+      }
+    ],
+    "vue/html-closing-bracket-spacing": [
+      "error",
+      {
+        "startTag": "never",
+        "endTag": "never",
+        "selfClosingTag": "always"
+      }
+    ],
+    "vue/new-line-between-multi-line-property": [
+      "error",
+      {
+        "minLineOfMultilineProperty": 2
+      }
+    ],
+    "vue/multiline-html-element-content-newline": [
+      "error",
+      {
+        "ignoreWhenEmpty": true,
+        "ignores": ["pre", "textarea", "small"],
+        "allowEmptyLines": false
+      }
+    ],
+    "vue/singleline-html-element-content-newline": [
+      "error",
+      {
+        "ignoreWhenNoAttributes": false,
+        "ignoreWhenEmpty": true,
+        "ignores": ["pre", "textarea", "small"]
+      }
+    ],
+    "vue/padding-line-between-blocks": ["error", "always"],
+    "vue/multi-word-component-names": "off",
+    "vue/no-spaces-around-equal-signs-in-attribute": ["error"],
+    "vue/max-len": [
+      "error",
+      {
+        "code": 120,
+        "template": 80,
+        "tabWidth": 2,
+        "comments": 80,
+        "ignorePattern": "",
+        "ignoreComments": false,
+        "ignoreTrailingComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": false,
+        "ignoreRegExpLiterals": true,
+        "ignoreHTMLAttributeValues": true,
+        "ignoreHTMLTextContents": true
+      }
+    ],
+    "vue/no-deprecated-v-on-native-modifier": "off",
+    "vue/no-deprecated-dollar-listeners-api": "warn"
+  }
+}

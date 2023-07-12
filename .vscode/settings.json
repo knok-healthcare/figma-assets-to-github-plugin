@@ -1,7 +1,53 @@
 {
+  // Auto format
+  "editor.formatOnSave": false,
+  "eslint.format.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": false,
+    "source.fixAll.stylelint": true
+  },
+
   // Disable Vetur as we use Volar now
   "vetur.format.enable": false,
   "vetur.validation.template": false,
   "vetur.validation.script": false,
-  "vetur.validation.style": false
+  "vetur.validation.style": false,
+
+  // Code Styling
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "stylelint.enable": true,
+  "stylelint.useLocal": true,
+  "stylelint.packageManager": "pnpm",
+  "stylelint.validate": ["css", "scss", "sass", "postcss", "vue"],
+  "stylelint.configFile": ".stylelintrc",
+
+  // Format Vue and JS with Eslint only
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+
+  // Format styles using stylelint
+  "[css]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  },
+  "[less]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  },
+
+  // All others use prettier
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }

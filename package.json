@@ -12,11 +12,22 @@
     "core:dev": "pnpm --filter core dev",
     "build": "pnpm core:build && pnpm ui:build",
     "ui:build": "pnpm --filter ui build",
-    "core:build": "pnpm --filter core build"
+    "core:build": "pnpm --filter core build",
+    "lint:fix": "eslint --ext .js,.ts,.tsx,.vue --ignore-path .gitignore --fix apps packages"
   },
   "devDependencies": {
     "@figma/plugin-typings": "*",
-    "typescript": "*"
+    "typescript": "*",
+    "stylelint": "^15.10.1",
+    "stylelint-config-recess-order": "^4.3.0",
+    "stylelint-config-standard": "^34.0.0",
+    "stylelint-config-standard-scss": "^10.0.0",
+    "stylelint-config-standard-vue": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.0.0"
   },
   "engines": {
     "pnpm": ">= 8.6.5",
