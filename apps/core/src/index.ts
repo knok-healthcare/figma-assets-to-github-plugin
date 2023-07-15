@@ -26,6 +26,7 @@ getStoredValues().then(storage => {
 
   // Send the client settings to the rendered UI
   figma.ui.postMessage({
+    event: 'initial-data',
     storage,
     currentPage: {
       id: figma.currentPage.id,
@@ -113,6 +114,10 @@ async function exportAssets(data: ClientStorage) {
       extension: data.exportFormat === 'SVG' ? 'svg' : 'vue',
       commitMessage: PluginConfig.github.commitMessage,
       destinationFolder: data.destinationFolder,
+    })
+
+    figma.ui.postMessage({
+      event: 'export-completed',
     })
   } catch (error) {
     // eslint-disable-next-line no-console

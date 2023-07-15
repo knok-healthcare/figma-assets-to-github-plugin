@@ -21,6 +21,9 @@ export const useFigmaStore = defineStore('figma', {
       targetBranch: '',
       destinationFolder: '',
     } as ClientStorage,
+
+    /** Defines if the export process is in progress or not */
+    exporting: false,
   }),
 
   getters: {
@@ -94,6 +97,10 @@ export const useFigmaStore = defineStore('figma', {
         },
         '*'
       )
+    },
+
+    setExporting(exporting: boolean) {
+      this.exporting = exporting
     },
   },
 })

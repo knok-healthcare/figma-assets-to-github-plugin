@@ -1,4 +1,8 @@
 <template>
+  <ExportingState v-if="exporting" />
+
+  <ExportedSuccessfullyState v-else-if="success" />
+
   <TabView :tabs="tabs">
     <template #default="{ selectedTab }">
       <AssetConfiguration v-if="selectedTab === 'asset-configurations'" />
@@ -21,8 +25,11 @@
 import TabView from '@/components/Navigation/TabView.vue'
 import AssetConfiguration from '@/views/AssetConfiguration.vue'
 import GithubConfiguration from '@/views/GithubConfiguration.vue'
+import ExportingState from '@/states/Exporting.vue'
+import ExportedSuccessfullyState from '@/states/ExportedSuccessfully.vue'
 import { useFigmaStore } from '@/stores/figma'
 import { storeToRefs } from 'pinia'
+import { ref } from 'vue'
 
 export default {
   name: 'App',
@@ -32,22 +39,41 @@ export default {
     // "Views"
     AssetConfiguration,
     GithubConfiguration,
+    // States
+    ExportingState,
+    ExportedSuccessfullyState
   },
 
   setup() {
     const figma = useFigmaStore()
-    const { clientStorage } = storeToRefs(figma)
+    const { clientStorage, exporting } = storeToRefs(figma)
 
-    // Wait for a postMessage from the parent to
-    // set the initial values from the client storage
+    /** Defines if the export process finished successfully */
+    const success = ref(false)
+
+    /** Defines a callback for messages sent by the plugin core */
     onmessage = event => {
-      figma.setCurrentPage(event.data.pluginMessage.currentPage)
-      figma.setClientStorage(event.data.pluginMessage.storage)
-      figma.setDefaultClientStorageValues()
+      if (event.data.pluginMessage.event === 'initial-data') {
+        figma.setCurrentPage(event.data.pluginMessage.currentPage)
+        figma.setClientStorage(event.data.pluginMessage.storage)
+        figma.setDefaultClientStorageValues()
+      } else if (event.data.pluginMessage.event === 'export-completed') {
+        // Show success state
+        figma.setExporting(false)
+        success.value = true
+
+        setTimeout(() => {
+          success.value = false
+        }, 3000)
+      }
     }
 
     return {
       clientStorage,
+      exporting,
+      success,
+
+      setExporting: figma.setExporting
     }
   },
 
@@ -68,17 +94,21 @@ export default {
 
   methods: {
     onExportButtonClick() {
-      // @todo: add loading while exporting and show a feedback message after
-      // the components have been exported successfully or an error occurred.
-      parent.postMessage(
-        {
-          pluginMessage: {
-            event: 'export-assets',
-            data: { ...this.clientStorage },
+      this.setExporting(true)
+
+      // ⚒️ Allow loading animation to start before performing postMessage
+      // as this operating will "block" the main thread for a moment
+      setTimeout(() => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              event: 'export-assets',
+              data: { ...this.clientStorage },
+            },
           },
-        },
-        '*'
-      )
+          '*'
+        )
+      }, 250)
     },
   },
 }
