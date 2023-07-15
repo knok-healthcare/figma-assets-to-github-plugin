@@ -43,3 +43,23 @@ export function getComponentsByPanelIds(ids: string[]) {
     return getComponentsFromPanel(panel)
   })
 }
+
+/** Gets all components inside a specific board from a page */
+export function getComponentsByPageAndBoardId(pageId: string, boardId: string) {
+  if (!pageId) throw new Error('Missing required "pageId" parameter.')
+  if (!boardId) throw new Error('Missing required "boardId" parameter.')
+
+  const selectedPage = figma.currentPage.parent?.children.find(
+    page => page.id === pageId
+  ) as unknown as PageNode
+  if (!selectedPage) throw new Error('Specified page not found')
+
+  const selectedBoard = selectedPage.children.find(
+    board => board.id === boardId
+  ) as ComponentSetNode
+  if (!selectedBoard) throw new Error('Specified board not found')
+
+  const components = getComponentsFromPanel(selectedBoard)
+
+  return components
+}

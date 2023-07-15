@@ -9,7 +9,7 @@
 import type { ClientStorage } from '../../../types'
 import type { PostMessageEvent } from './types/events'
 
-import { getStoredValues, getComponentsByPanelIds, getAllComponents } from './utils/figma'
+import { getStoredValues, getComponentsByPageAndBoardId } from './utils/figma'
 import { checkRequiredDataForExport } from './utils/validators'
 import PluginConfig from './config/plugin'
 import SvgExtractor from '@packages/svg-extractor'
@@ -25,7 +25,27 @@ getStoredValues().then(storage => {
   figma.showUI(__html__, PluginConfig.window)
 
   // Send the client settings to the rendered UI
-  figma.ui.postMessage({ storage })
+  figma.ui.postMessage({
+    storage,
+    currentPage: {
+      id: figma.currentPage.id,
+      name: figma.currentPage.name,
+      children: figma.currentPage.children.map(board => ({
+        id: board.id,
+        name: board.name,
+      })),
+      parent: {
+        children: figma.currentPage.parent?.children.map(page => ({
+          id: page.id,
+          name: page.name,
+          children: (page as unknown as PageNode).children.map(board => ({
+            id: board.id,
+            name: board.name,
+          })),
+        })),
+      },
+    },
+  })
 })
 
 /** Handles a postMessage event sent from the UI */
@@ -57,21 +77,26 @@ async function exportAssets(data: ClientStorage) {
     checkRequiredDataForExport(data)
 
     // Get all figma components
-    let figmaComponents
-    if (!data.selectedBoardId) figmaComponents = getAllComponents()
-    else {
-      figmaComponents = data.rtlEnabled
-        ? getComponentsByPanelIds([data.selectedBoardId, data.selectedRTLBoardId])
-        : getComponentsByPanelIds([data.selectedBoardId])
+    const ltrFigmaComponents: ComponentNode[] = getComponentsByPageAndBoardId(
+      data.selectedPageId,
+      data.selectedBoardId
+    )
+
+    let rtlVariants: ComponentNode[] = []
+    if (data.rtlEnabled) {
+      rtlVariants = getComponentsByPageAndBoardId(
+        data.selectedRTLPageId,
+        data.selectedRTLBoardId
+      )
     }
 
     // Build final object with all components to export to Github
     let exportableComponents: Record<string, string> = {}
 
     if (data.exportFormat === 'SVG') {
-      exportableComponents = await SvgExtractor.extract(figmaComponents)
+      exportableComponents = await SvgExtractor.extract(ltrFigmaComponents)
     } else if (data.exportFormat === 'Vue') {
-      exportableComponents = await VueExtractor.extract(figmaComponents)
+      exportableComponents = await VueExtractor.extract(ltrFigmaComponents, rtlVariants)
     }
 
     // Export the components

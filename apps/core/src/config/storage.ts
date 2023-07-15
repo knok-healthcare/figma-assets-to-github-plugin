@@ -6,7 +6,23 @@ export const ClientStorageProps: {
 }[] = [
   {
     name: 'exportFormat',
-    defaultValue: 'default',
+    defaultValue: 'SVG',
+  },
+  {
+    name: 'selectedPageId',
+    defaultValue: '',
+  },
+  {
+    name: 'selectedBoardId',
+    defaultValue: '',
+  },
+  {
+    name: 'selectedRTLPageId',
+    defaultValue: '',
+  },
+  {
+    name: 'selectedRTLBoardId',
+    defaultValue: '',
   },
   {
     name: 'destinationFolder',

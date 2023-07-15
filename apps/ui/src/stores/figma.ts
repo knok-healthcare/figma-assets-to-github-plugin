@@ -3,13 +3,15 @@ import type { ClientStorage, ExportableFormat } from '../../../../types'
 
 export const useFigmaStore = defineStore('figma', {
   state: () => ({
-    boards: [],
+    currentPage: {} as PageNode,
 
     clientStorage: {
       // Asset configurations
       exportFormat: 'SVG' as ExportableFormat,
       rtlEnabled: false,
+      selectedPageId: '',
       selectedBoardId: '',
+      selectedRTLPageId: '',
       selectedRTLBoardId: '',
 
       // Github configurations
@@ -18,24 +20,60 @@ export const useFigmaStore = defineStore('figma', {
       repositoryOwner: '',
       targetBranch: '',
       destinationFolder: '',
-    },
+    } as ClientStorage,
   }),
 
   getters: {
-    allBoards: state => state.boards,
+    pages: state => state.currentPage.parent?.children,
+
+    boards: state => {
+      if (!state.currentPage || !state.currentPage.parent?.children) return []
+
+      return (
+        state.currentPage.parent?.children.find(
+          page => page.id === state.clientStorage.selectedPageId
+        ) as unknown as PageNode
+      ).children
+    },
+
+    rtlBoards: state => {
+      if (!state.currentPage || !state.currentPage.parent?.children) return []
+
+      return (
+        state.currentPage.parent?.children.find(
+          page => page.id === state.clientStorage.selectedRTLPageId
+        ) as unknown as PageNode
+      ).children
+    },
 
     storage: state => state.clientStorage,
   },
 
   actions: {
-    /** @todo add typing for figma board object */
-    setBoards(boards: never[]) {
-      this.boards = boards
+    /** Defines a new value for the entire currentPage object */
+    setCurrentPage(currentPage: PageNode) {
+      this.currentPage = currentPage
     },
 
     /** Defines a new value for the entire clientStorage object */
     setClientStorage(clientStorage: typeof this.clientStorage) {
       this.clientStorage = clientStorage
+    },
+
+    setDefaultClientStorageValues() {
+      if (
+        !this.clientStorage.selectedPageId ||
+        this.clientStorage.selectedPageId === '-1'
+      ) {
+        this.clientStorage.selectedPageId = this.currentPage.id
+      }
+
+      if (
+        !this.clientStorage.selectedBoardId ||
+        this.clientStorage.selectedBoardId === '-1'
+      ) {
+        this.clientStorage.selectedBoardId = this.boards[0].id
+      }
     },
 
     /** Updates the value of a specific field of the figma client storage */

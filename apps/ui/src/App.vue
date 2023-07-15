@@ -41,7 +41,9 @@ export default {
     // Wait for a postMessage from the parent to
     // set the initial values from the client storage
     onmessage = event => {
+      figma.setCurrentPage(event.data.pluginMessage.currentPage)
       figma.setClientStorage(event.data.pluginMessage.storage)
+      figma.setDefaultClientStorageValues()
     }
 
     return {
@@ -105,7 +107,7 @@ body {
 
 h6 {
   margin-top: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   font-weight: bold;
   color: #bcbcbc;
   text-transform: uppercase;

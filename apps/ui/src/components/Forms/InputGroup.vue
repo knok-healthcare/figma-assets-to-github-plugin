@@ -30,14 +30,22 @@ export default {
   &[data-inline='true'] {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
   }
 
   label {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-size: 11.5px;
-    color: #bcbcbc;
-    letter-spacing: 0.03em;
+    font-weight: 600;
+    color: #a4a4a4;
+
+    small {
+      position: relative;
+      bottom: -2px;
+      font-size: 9.5px;
+      color: rgb(0 0 0 / 30%);
+    }
   }
 
   label[for] {
@@ -47,10 +55,14 @@ export default {
   input,
   select {
     padding: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border: 1px solid #bcbcbc;
     border-radius: 3px;
     outline: none;
+  }
+
+  input[type="checkbox"] ~ label {
+    margin-left: 4px;
   }
 }
 </style>

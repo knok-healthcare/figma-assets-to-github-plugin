@@ -8,8 +8,9 @@
       <Column>
         <InputGroup>
           <label for="repositoryOwner">
-            Repository owner
+            Repository owner <small>(mandatory)</small>
           </label>
+
           <input
             id="repositoryOwner"
             type="text"
@@ -23,8 +24,9 @@
       <Column>
         <InputGroup>
           <label for="repositoryName">
-            Repository name
+            Repository name <small>(mandatory)</small>
           </label>
+
           <input
             id="repositoryName"
             type="text"
@@ -40,8 +42,9 @@
       <Column>
         <InputGroup>
           <label for="repositoryBranch">
-            Branch
+            Base branch <small>(mandatory)</small>
           </label>
+
           <input
             id="repositoryBranch"
             type="text"
@@ -55,8 +58,9 @@
       <Column>
         <InputGroup>
           <label for="destinationFolder">
-            Destination folder
+            Destination folder <small>(mandatory)</small>
           </label>
+
           <input
             id="destinationFolder"
             type="text"
@@ -71,10 +75,12 @@
     <h6>
       Authentication
     </h6>
+
     <InputGroup>
       <label for="githubAccessToken">
-        Github access token
+        Github access token <small>(mandatory)</small>
       </label>
+
       <input
         id="githubAccessToken"
         type="password"
