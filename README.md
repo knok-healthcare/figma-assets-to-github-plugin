@@ -1,4 +1,11 @@
+<div align="center">
+
+![Figma to Github Plugin Icon](/assets/icons/icon256.svg)
+
 # Figma Assets to Github Plugin
+
+</div>
+
 
 This plugin adds the ability to export figma assets (icons) to a github repository through a pull request.
 
