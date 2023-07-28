@@ -6,8 +6,9 @@
 
 </div>
 
-
 This plugin adds the ability to export figma assets (icons) to a github repository through a pull request.
+
+[📚 Documentation](https://github.com/knok-healthcare/figma-assets-to-github-plugin/wiki)
 
 ---
 
