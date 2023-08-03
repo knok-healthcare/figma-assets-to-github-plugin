@@ -84,7 +84,7 @@ async function exportAssets(data: ClientStorage) {
     )
 
     let rtlVariants: ComponentNode[] = []
-    if (data.rtlEnabled) {
+    if (data.rtlEnabled && data.exportFormat !== 'SVG') {
       rtlVariants = getComponentsByPageAndBoardId(
         data.selectedRTLPageId,
         data.selectedRTLBoardId

@@ -1,5 +1,7 @@
 import utils from '@packages/utils'
 
+const NAME_ACCEPTABLE_PROPS = ['Name', 'Type', 'Size']
+
 export default class SvgExtractor {
   static async extract(figmaComponents: ComponentNode[]) {
     const components: Record<string, string> = {}
@@ -11,11 +13,19 @@ export default class SvgExtractor {
        * Builds the component name
        * (uses the variant property "name" if exists, otherwise just the "component name")
        */
-      const componentName = utils.components.formatName(
-        !component.variantProperties || !component.variantProperties['Name']
-          ? component.name
-          : component.variantProperties['Name']
-      )
+
+      let componentName
+      if (!component.variantProperties || !component.variantProperties['Name']) {
+        componentName = utils.components.formatName(component.name)
+      } else {
+        const resolvedName = NAME_ACCEPTABLE_PROPS.reduce((previousVal, currentVal) => {
+          if (!component.variantProperties) return previousVal
+
+          return previousVal + component.variantProperties[currentVal]
+        }, '')
+
+        componentName = utils.components.formatName(resolvedName)
+      }
 
       const finalSVG = await component.exportAsync({
         format: 'SVG_STRING',

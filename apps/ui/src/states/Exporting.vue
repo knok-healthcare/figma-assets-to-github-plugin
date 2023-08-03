@@ -13,7 +13,7 @@
     </div>
 
     <h4>
-      Exporting to assets to Github.
+      Exporting assets to Github.
     </h4>
   </div>
 </template>
