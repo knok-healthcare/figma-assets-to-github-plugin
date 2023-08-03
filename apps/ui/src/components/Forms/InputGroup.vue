@@ -22,6 +22,7 @@ export default {
 <style lang="scss">
 .input-group {
   display: flex;
+  margin-bottom: 8px;
 
   &[data-inline='false'] {
     flex-direction: column;
@@ -34,6 +35,14 @@ export default {
     margin-bottom: 4px;
   }
 
+  small {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #949ea5;
+    letter-spacing: -0.5px;
+  }
+
   label {
     margin-bottom: 4px;
     font-size: 11.5px;
@@ -43,8 +52,12 @@ export default {
     small {
       position: relative;
       bottom: -2px;
+      margin-top: 0;
+      margin-bottom: 0;
       font-size: 9.5px;
+      font-weight: regular;
       color: rgb(0 0 0 / 30%);
+      letter-spacing: normal;
     }
   }
 
@@ -55,7 +68,6 @@ export default {
   input,
   select {
     padding: 8px;
-    margin-bottom: 8px;
     border: 1px solid #bcbcbc;
     border-radius: 3px;
     outline: none;

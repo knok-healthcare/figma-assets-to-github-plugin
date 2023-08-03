@@ -12,6 +12,8 @@ export type ExportableFormat = "SVG" | "Vue";
 export type ClientStorage = {
   /** Defines the format of the files that will be exported. */
   exportFormat: ExportableFormat
+  /** A suffix to append to the end of the name of every file when exporting */
+  fileSuffix: string
   /** Defines if the exported components should include RTL variants or not. */
   rtlEnabled: boolean
   /** The main figma page that contains the board with components to export. */

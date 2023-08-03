@@ -21,6 +21,24 @@
       </select>
     </InputGroup>
 
+    <InputGroup>
+      <label for="exportFormat">
+        Suffix <small>(optional)</small>
+      </label>
+
+      <input
+        id="fileSuffix"
+        type="text"
+        placeholder="example: Icon"
+        :value="clientStorage.fileSuffix"
+        @input="onInput('fileSuffix', $event)"
+      />
+
+      <small>
+        The suffix can be useful if you want your assets to have a specific word in the end of every file name.
+      </small>
+    </InputGroup>
+
     <Row>
       <Column>
         <InputGroup>
@@ -200,6 +218,13 @@ export default {
       this.updateClientStorageField(
         field,
         (event.target as HTMLInputElement).checked
+      );
+    },
+
+    onInput(field: keyof ClientStorage, event: Event) {
+      this.updateClientStorageField(
+        field,
+        (event.target as HTMLInputElement).value
       );
     },
   },

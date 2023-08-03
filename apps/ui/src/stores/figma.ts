@@ -8,6 +8,7 @@ export const useFigmaStore = defineStore('figma', {
     clientStorage: {
       // Asset configurations
       exportFormat: 'SVG' as ExportableFormat,
+      fileSuffix: '',
       rtlEnabled: false,
       selectedPageId: '',
       selectedBoardId: '',

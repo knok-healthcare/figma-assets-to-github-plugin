@@ -9,6 +9,10 @@ export const ClientStorageProps: {
     defaultValue: 'SVG',
   },
   {
+    name: 'fileSuffix',
+    defaultValue: '',
+  },
+  {
     name: 'selectedPageId',
     defaultValue: '',
   },

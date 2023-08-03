@@ -100,6 +100,16 @@ async function exportAssets(data: ClientStorage) {
       exportableComponents = await VueExtractor.extract(ltrFigmaComponents, rtlVariants)
     }
 
+    // Add suffix to every file name
+    if (data.fileSuffix) {
+      exportableComponents = Object.fromEntries(
+        Object.entries(exportableComponents).map(([key, value]) =>
+          // Modify key here
+          [`${key}${data.fileSuffix}`, value]
+        )
+      )
+    }
+
     // Export the components
     const github = new GithubConnector({
       repositoryOwner: data.repositoryOwner,
