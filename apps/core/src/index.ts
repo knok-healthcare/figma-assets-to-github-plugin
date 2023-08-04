@@ -110,6 +110,9 @@ async function exportAssets(data: ClientStorage) {
       )
     }
 
+    const createDefaultExportsFile =
+      data.createDefaultExportsJsFile || data.createDefaultExportsTsFile
+
     // Export the components
     const github = new GithubConnector({
       repositoryOwner: data.repositoryOwner,
@@ -124,6 +127,8 @@ async function exportAssets(data: ClientStorage) {
       extension: data.exportFormat === 'SVG' ? 'svg' : 'vue',
       commitMessage: PluginConfig.github.commitMessage,
       destinationFolder: data.destinationFolder,
+      createDefaultExportsFile: createDefaultExportsFile,
+      defaultExportsFileExtension: data.createDefaultExportsJsFile ? 'js' : 'ts',
     })
 
     figma.ui.postMessage({

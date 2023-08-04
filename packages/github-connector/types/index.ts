@@ -50,6 +50,10 @@ export type ExportFilesDto = {
    * Note: **Cannot be an absolute path** (starting with a /).
    */
   destinationFolder: string
+  /** Defines if the default exports file should be created or not */
+  createDefaultExportsFile: boolean
+  /** Defines the extension of the default exports file */
+  defaultExportsFileExtension: string
 }
 
 export type File = {

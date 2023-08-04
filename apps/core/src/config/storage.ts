@@ -37,6 +37,14 @@ export const ClientStorageProps: {
     defaultValue: false,
   },
   {
+    name: 'createDefaultExportsJsFile',
+    defaultValue: false,
+  },
+  {
+    name: 'createDefaultExportsTsFile',
+    defaultValue: false,
+  },
+  {
     name: 'repositoryOwner',
     defaultValue: '',
   },

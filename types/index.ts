@@ -3,7 +3,7 @@
  *
  * @TODO: Add support for other formats (e.g. React, default web components, ...)
  */
-export type ExportableFormat = "SVG" | "Vue";
+export type ExportableFormat = 'SVG' | 'Vue'
 
 /**
  * Application settings storied in
@@ -16,6 +16,10 @@ export type ClientStorage = {
   fileSuffix: string
   /** Defines if the exported components should include RTL variants or not. */
   rtlEnabled: boolean
+  /** Defines if the plugin should create a javascript file with default exports of all assets in the destination folder */
+  createDefaultExportsJsFile: boolean
+  /** Defines if the plugin should create a typescript file with default exports of all assets in the destination folder */
+  createDefaultExportsTsFile: boolean
   /** The main figma page that contains the board with components to export. */
   selectedPageId: string
   /** The main board where the plugin will look for figma components to export. */

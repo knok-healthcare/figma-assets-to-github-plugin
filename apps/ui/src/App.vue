@@ -6,6 +6,7 @@
   <TabView :tabs="tabs">
     <template #default="{ selectedTab }">
       <AssetConfiguration v-if="selectedTab === 'asset-configurations'" />
+      <FigmaConfiguration v-else-if="selectedTab === 'figma-configurations'" />
       <GithubConfiguration v-else-if="selectedTab === 'github-configurations'" />
     </template>
 
@@ -23,6 +24,7 @@
 
 <script lang="ts">
 import TabView from '@/components/Navigation/TabView.vue'
+import FigmaConfiguration from '@/views/FigmaConfiguration.vue'
 import AssetConfiguration from '@/views/AssetConfiguration.vue'
 import GithubConfiguration from '@/views/GithubConfiguration.vue'
 import ExportingState from '@/states/Exporting.vue'
@@ -37,6 +39,7 @@ export default {
   components: {
     TabView,
     // "Views"
+    FigmaConfiguration,
     AssetConfiguration,
     GithubConfiguration,
     // States
@@ -83,6 +86,10 @@ export default {
         {
           id: 'asset-configurations',
           label: 'Assets',
+        },
+        {
+          id: 'figma-configurations',
+          label: 'Figma',
         },
         {
           id: 'github-configurations',

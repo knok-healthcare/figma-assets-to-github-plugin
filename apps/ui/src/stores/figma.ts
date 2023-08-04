@@ -10,6 +10,8 @@ export const useFigmaStore = defineStore('figma', {
       exportFormat: 'SVG' as ExportableFormat,
       fileSuffix: '',
       rtlEnabled: false,
+      createDefaultExportsJsFile: false,
+      createDefaultExportsTsFile: false,
       selectedPageId: '',
       selectedBoardId: '',
       selectedRTLPageId: '',

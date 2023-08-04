@@ -73,6 +73,10 @@ export default {
     outline: none;
   }
 
+  input[type="checkbox"] {
+    margin-bottom: 8px;
+  }
+
   input[type="checkbox"] ~ label {
     margin-left: 4px;
   }

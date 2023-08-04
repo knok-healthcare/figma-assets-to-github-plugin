@@ -198,6 +198,8 @@ export default class GithubConnector {
     extension,
     destinationFolder,
     commitMessage,
+    createDefaultExportsFile,
+    defaultExportsFileExtension,
   }: ExportFilesDto) {
     const files: File[] = []
 
@@ -216,6 +218,21 @@ export default class GithubConnector {
 
     for (let i = 0; i < fileCreationResults.length; i++) {
       const file = fileCreationResults[i]
+      files.push(file)
+    }
+
+    if (createDefaultExportsFile) {
+      const defaultExportsContent = Object.keys(components)
+        .map(name => `export { default as ${name} } from './${name}.${extension}'`)
+        .join('\n')
+
+      const file = await this.createFile({
+        name: 'exported-assets',
+        extension: defaultExportsFileExtension,
+        content: defaultExportsContent,
+        encoding: 'utf-8',
+      })
+
       files.push(file)
     }
 
