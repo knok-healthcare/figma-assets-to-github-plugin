@@ -13,10 +13,12 @@ import {
 } from './types'
 import type { GetRefEndpoint } from './services/Refs'
 import Pulls from './services/Pulls'
+import RateLimiter from './rate-limiter'
 
 export default class GithubConnector {
   private repositoryOwner
   private repositoryName
+  private blobLimiter
 
   constructor(params: GithubConnectorDto) {
     if (!params.accessToken)
@@ -26,18 +28,20 @@ export default class GithubConnector {
     this.repositoryName = params.repositoryName
 
     API.authenticate(params.accessToken)
+
+    this.blobLimiter = new RateLimiter(20)
   }
 
   /// Blob methods
   async createFile({
-    name, extension, content, encoding 
+    name, extension, content, encoding
   }: CreateBlobDto) {
-    const file = await Blobs.createBlob({
+    const file = (await this.blobLimiter.enqueue(Blobs.createBlob, {
       owner: this.repositoryOwner,
       repo: this.repositoryName,
       content,
       encoding,
-    })
+    })) as { url: string; sha: string }
 
     return {
       name,
@@ -197,21 +201,21 @@ export default class GithubConnector {
   }: ExportFilesDto) {
     const files: File[] = []
 
-    const componentNames = Object.keys(components)
-    for (let i = 0; i < componentNames.length; i++) {
-      const componentName = componentNames[i]
-      const component = components[componentName]
+    const fileCreationResults = await Promise.all(
+      Object.keys(components).map(componentName => {
+        const component = components[componentName]
 
-      // note: this can't be fully paralelized because of a browser
-      //       simultaneous request rate limiter.
-      //       @TODO: Split this into chunks and perform X requests in parallel at a time
-      const file = await this.createFile({
-        name: componentName,
-        extension: extension,
-        content: component,
-        encoding: 'utf-8',
+        return this.createFile({
+          name: componentName,
+          extension: extension,
+          content: component,
+          encoding: 'utf-8',
+        })
       })
+    )
 
+    for (let i = 0; i < fileCreationResults.length; i++) {
+      const file = fileCreationResults[i]
       files.push(file)
     }
 
