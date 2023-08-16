@@ -1,4 +1,4 @@
-import type { VuePropMap, FigmaComponentProperties } from './types'
+import type { VuePropMap } from './types'
 import utils from '@packages/utils'
 
 export default class VueExtractor {
@@ -11,9 +11,15 @@ export default class VueExtractor {
         hasRtl: boolean
       }
     > = {}
+    // Get all props from all possible components (LTR and RTL)
+    const props = extractComponentProps([...ltrVariants, ...rtlVariants])
+
     // Export LTR (left-to-right) variants
     for (let i = 0; i < ltrVariants.length; i++) {
       const component = ltrVariants[i] as ComponentNode
+      const variantProperties = component.variantProperties
+        ? filterComponentProperties(component.variantProperties)
+        : {}
 
       /**
        * Builds the component name
@@ -38,36 +44,37 @@ export default class VueExtractor {
             component.variantProperties['Name'] === variant.variantProperties['Name']
         )
 
-      const properties = component.variantProperties
-        ? filterComponentProperties(component.variantProperties)
-        : {}
-      const condition = componentPropertiesAsConditionString(properties)
-
       if (!componentsToExport[componentName]) {
+        const condition = componentPropertiesAsConditionString(
+          variantProperties,
+          props[componentName]
+        )
+
         componentsToExport[componentName] = {
           code: svg.replace(
             '<svg',
             `<svg v-if="${
               hasRTLVariant ? '!rtl' + (condition !== '' ? ' && ' : '') : ''
-            }${condition}" `
+            }${condition}"`
           ),
-          props: getComponentProps({}, properties),
+          props: props[componentName],
           hasRtl: false,
         }
       } else {
+        const condition = componentPropertiesAsConditionString(
+          variantProperties,
+          props[componentName]
+        )
+
+        componentsToExport[componentName].props = props[componentName]
         componentsToExport[componentName].code +=
           '\n' +
           svg.replace(
             '<svg',
             `<svg v-else-if="${
               hasRTLVariant ? '!rtl' + (condition !== '' ? ' && ' : '') : ''
-            }${condition}" `
+            }${condition}"`
           )
-
-        componentsToExport[componentName].props = getComponentProps(
-          componentsToExport[componentName].props,
-          properties
-        )
       }
     }
 
@@ -89,33 +96,38 @@ export default class VueExtractor {
         format: 'SVG_STRING',
       })
 
-      const properties = component.variantProperties
+      const variantProperties = component.variantProperties
         ? filterComponentProperties(component.variantProperties)
         : {}
-      const condition = componentPropertiesAsConditionString(properties)
 
       if (!componentsToExport[componentName]) {
+        const condition = componentPropertiesAsConditionString(
+          variantProperties,
+          props[componentName]
+        )
+
         componentsToExport[componentName] = {
           code: svg.replace(
             '<svg',
-            `<svg v-if="rtl${condition !== '' ? ' && ' + condition : ''}" `
+            `<svg v-if="rtl${condition !== '' ? ' && ' + condition : ''}"`
           ),
-          props: getComponentProps({}, properties),
+          props: props[componentName],
           hasRtl: true,
         }
       } else {
+        const condition = componentPropertiesAsConditionString(
+          variantProperties,
+          props[componentName]
+        )
+
         componentsToExport[componentName].code +=
           '\n' +
           svg.replace(
             '<svg',
-            `<svg v-else-if="rtl${condition !== '' ? ' && ' + condition : ''}" `
+            `<svg v-else-if="rtl${condition !== '' ? ' && ' + condition : ''}"`
           )
 
-        componentsToExport[componentName].props = getComponentProps(
-          componentsToExport[componentName].props,
-          properties
-        )
-
+        componentsToExport[componentName].props = props[componentName]
         componentsToExport[componentName].hasRtl = true
       }
     }
@@ -124,6 +136,47 @@ export default class VueExtractor {
 
     return components
   }
+}
+
+const extractComponentProps = (figmaComponents: ComponentNode[]) => {
+  const props: { [componentName: string]: VuePropMap } = {}
+
+  for (let i = 0; i < figmaComponents.length; i++) {
+    const component = figmaComponents[i] as ComponentNode
+    const properties = component.variantProperties
+      ? filterComponentProperties(component.variantProperties)
+      : {}
+
+    const componentName = utils.components.formatName(
+      !component.variantProperties || !component.variantProperties['Name']
+        ? component.name
+        : component.variantProperties['Name']
+    )
+
+    if (!props[componentName]) {
+      props[componentName] = {}
+    }
+
+    Object.keys(properties).forEach(key => {
+      const propertyName = utils.casing.toCamelCase(key)
+
+      if (!props[componentName][propertyName]) {
+        props[componentName][propertyName] = {
+          possibleValues: [properties[key]],
+          defaultValue: properties[key],
+        }
+      } else {
+        if (
+          props[componentName][propertyName].possibleValues.indexOf(properties[key]) ===
+          -1
+        ) {
+          props[componentName][propertyName].possibleValues.push(properties[key])
+        }
+      }
+    })
+  }
+
+  return props
 }
 
 const filterComponentProperties = (componentProperties: { [name: string]: string }) => {
@@ -138,41 +191,25 @@ const filterComponentProperties = (componentProperties: { [name: string]: string
   return filteredProperties
 }
 
-const componentPropertiesAsConditionString = (componentProperties: {
-  [name: string]: string
-}) => {
+const componentPropertiesAsConditionString = (
+  componentProperties: {
+    [name: string]: string
+  },
+  props: VuePropMap
+) => {
   let str = ''
 
-  Object.keys(componentProperties).forEach(key => {
-    if (str !== '') str += ' && '
+  Object.keys(componentProperties).forEach(prop => {
+    const propName = utils.casing.toCamelCase(prop)
 
-    str += utils.casing.toCamelCase(key) + " === '" + componentProperties[key] + "'"
-  })
+    if (props[propName].possibleValues.length > 1) {
+      if (str !== '') str += ' && '
 
-  return str
-}
-
-const getComponentProps = (
-  props: VuePropMap,
-  componentProperties: FigmaComponentProperties
-) => {
-  Object.keys(componentProperties).forEach(key => {
-    const propertyName = utils.casing.toCamelCase(key)
-
-    if (!props[propertyName]) {
-      // @TODO: Allow to customize default values on the plugin UI
-      props[propertyName] = {
-        possibleValues: [componentProperties[key]],
-        defaultValue: componentProperties[key],
-      }
-    } else {
-      if (props[propertyName].possibleValues.indexOf(componentProperties[key]) === -1) {
-        props[propertyName].possibleValues.push(componentProperties[key])
-      }
+      str += propName + " === '" + componentProperties[prop] + "'"
     }
   })
 
-  return props
+  return str
 }
 
 const componentPropsAsString = (props: VuePropMap, hasRtl: boolean = false) => {
@@ -181,23 +218,25 @@ const componentPropsAsString = (props: VuePropMap, hasRtl: boolean = false) => {
   Object.keys(props).forEach(propName => {
     const prop = props[propName]
 
-    if (propsStr !== '') {
-      propsStr += ',\n\n'
+    if (prop.possibleValues.length > 1) {
+      if (propsStr !== '') {
+        propsStr += ',\n\n'
+      }
+
+      propsStr += `    /**\n     * @type {${prop.possibleValues
+        .map(v => `'${v}'`)
+        .join(' | ')}}\n     */\n`
+
+      propsStr +=
+        '    ' +
+        propName +
+        ': ' +
+        '{\n' +
+        '      type: String, \n' +
+        '      default: "' +
+        prop.defaultValue +
+        '"\n    }'
     }
-
-    propsStr += `    /**\n     * @type {${prop.possibleValues
-      .map(v => `'${v}'`)
-      .join(' | ')}}\n     */\n`
-
-    propsStr +=
-      '    ' +
-      propName +
-      ': ' +
-      '{\n' +
-      '      type: String, \n' +
-      '      default: "' +
-      prop.defaultValue +
-      '"\n    }'
   })
 
   if (hasRtl) {
@@ -221,8 +260,7 @@ const componentPropsAsString = (props: VuePropMap, hasRtl: boolean = false) => {
 
 const newComponentTemplate = () => {
   return `<template>
-__COMPONENT_TEMPLATE__
-</template>
+__COMPONENT_TEMPLATE__</template>
 
 <script>
 export default {
