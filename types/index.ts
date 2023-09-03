@@ -38,4 +38,21 @@ export type ClientStorage = {
   targetBranch: string
   /** The destination folder inside the repository where our assets will be exported to. */
   destinationFolder: string
+  /** Object containing custom configurations for variant properties defined in Figma */
+  propOverrides: {
+    [propName: string]: {
+      visible: boolean
+      defaultValue?: string | number | boolean | null
+    }
+  }
+}
+
+export type VueProp = {
+  visible: boolean
+  defaultValue: string | number | boolean
+  possibleValues: string[]
+}
+
+export type VuePropMap = {
+  [propName: string]: VueProp
 }

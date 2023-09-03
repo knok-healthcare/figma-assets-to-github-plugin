@@ -33,7 +33,6 @@ export default class RateLimiter {
   async reevaluatePool() {
     // Remove finished jobs from the pool
     this.pool = this.pool.filter(job => job.status !== 'done')
-    console.log('pool size: ', this.pool.length)
 
     const jobsInProgress = this.pool.filter(job => job.status === 'in-progress')
     if (jobsInProgress.length < this.limit) {

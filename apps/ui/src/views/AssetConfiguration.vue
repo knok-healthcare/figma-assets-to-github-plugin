@@ -78,6 +78,64 @@
         </InputGroup>
       </Column>
     </Row>
+
+    <h6>
+      Properties
+    </h6>
+
+    <Row>
+      <table class="props-table">
+        <thead>
+          <tr>
+            <th>
+              Property
+            </th>
+            <th>
+              Visible
+            </th>
+            <th>
+              Default Value
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr
+            v-for="propName in Object.keys(availableProps)"
+            :key="propName">
+            <td>
+              {{ propName }}
+            </td>
+            <td>
+              <InputGroup inline>
+                <input
+                  :id="`prop_${propName}_visibility`"
+                  type="checkbox"
+                  :checked="availableProps[propName].visible"
+                  @change="updatePropVisibility(propName, $event)"
+                />
+              </InputGroup>
+            </td>
+            <td>
+              <InputGroup inline>
+                <select
+                  :id="`select_${propName}_defaultValue`"
+                  :value="availableProps[propName].defaultValue"
+                  @change="onChangePropDefaultValue(propName, $event)"
+                >
+                  <option
+                    v-for="value in availableProps[propName].possibleValues"
+                    :key="value"
+                    :value="value">
+                    {{ value }}
+                  </option>
+                </select>
+              </InputGroup>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Row>
   </div>
 </template>
 
@@ -101,15 +159,18 @@ export default {
 
   setup() {
     const figma = useFigmaStore();
-    const { clientStorage, pages, boards, rtlBoards } = storeToRefs(figma);
-    const { updateClientStorageField } = figma;
+    const { clientStorage, pages, boards, rtlBoards, availableProps } = storeToRefs(figma);
+    const { updateClientStorageField, updateAvailablePropVisibility, updateAvailablePropDefaultValue } = figma;
 
     return {
       clientStorage,
       pages,
       boards,
       rtlBoards,
+      availableProps,
       updateClientStorageField,
+      updateAvailablePropVisibility,
+      updateAvailablePropDefaultValue
     };
   },
 
@@ -121,9 +182,23 @@ export default {
       );
     },
 
+    onChangePropDefaultValue(propName: string, event: Event) {
+      this.updateAvailablePropDefaultValue(
+        propName,
+        (event.target as HTMLInputElement).value
+      );
+    },
+
     onCheckboxChange(field: keyof ClientStorage, event: Event) {
       this.updateClientStorageField(
         field,
+        (event.target as HTMLInputElement).checked
+      );
+    },
+
+    updatePropVisibility(propName: string, event: Event) {
+      this.updateAvailablePropVisibility(
+        propName,
         (event.target as HTMLInputElement).checked
       );
     },
@@ -137,3 +212,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.props-table {
+  width: 100%;
+  font-size: 13px;
+  text-align: left;
+}
+</style>

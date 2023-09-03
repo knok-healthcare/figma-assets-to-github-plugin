@@ -76,6 +76,9 @@ importers:
         specifier: ^3.3.4
         version: 3.3.4
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.14.197
+        version: 4.14.197
       '@types/node':
         specifier: ^20.3.3
         version: 20.3.3
@@ -88,6 +91,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^9.15.1
         version: 9.15.1(eslint@8.44.0)
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       sass:
         specifier: ^1.63.6
         version: 1.63.6
@@ -514,6 +520,10 @@ packages:
 
   /@types/json-schema@7.0.12:
     resolution: {integrity: sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA==}
+    dev: true
+
+  /@types/lodash@4.14.197:
+    resolution: {integrity: sha512-BMVOiWs0uNxHVlHBgzTIqJYmj+PgCo4euloGF+5m4okL3rEYzM2EEv78mw8zWSMM57dM7kVIgJ2QDvwHSoCI5g==}
     dev: true
 
   /@types/minimist@1.2.2:

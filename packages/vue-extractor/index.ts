@@ -1,73 +1,163 @@
-import type { VuePropMap } from './types'
+import Component from './component'
+import Props from './props'
+import type { PropConfig, PropMap } from './types'
 import utils from '@packages/utils'
 
 export default class VueExtractor {
-  static async extract(ltrVariants: ComponentNode[], rtlVariants: ComponentNode[]) {
-    const componentsToExport: Record<
-      string,
-      {
-        code: string
-        props: VuePropMap
-        hasRtl: boolean
+  static extractComponentProps(
+    figmaComponents: ComponentNode[],
+    groupByComponent = true,
+    propOverrides: {
+      [propName: string]: {
+        visible: boolean
+        defaultValue?: string | number | boolean | null
       }
-    > = {}
-    // Get all props from all possible components (LTR and RTL)
-    const props = extractComponentProps([...ltrVariants, ...rtlVariants])
+    },
+    filterProps = true
+  ) {
+    const props: { [componentName: string]: PropMap } = {}
+    const propMap: PropMap = {}
 
-    // Export LTR (left-to-right) variants
-    for (let i = 0; i < ltrVariants.length; i++) {
-      const component = ltrVariants[i] as ComponentNode
-      const variantProperties = component.variantProperties
-        ? filterComponentProperties(component.variantProperties)
-        : {}
+    for (let i = 0; i < figmaComponents.length; i++) {
+      const component = figmaComponents[i] as ComponentNode
+      const properties = component.variantProperties ? component.variantProperties : {}
 
-      /**
-       * Builds the component name
-       * (uses the variant property "name" if exists, otherwise just the "component name")
-       */
       const componentName = utils.components.formatName(
         !component.variantProperties || !component.variantProperties['Name']
           ? component.name
           : component.variantProperties['Name']
       )
 
-      const svg = await component.exportAsync({
-        format: 'SVG_STRING',
+      if (groupByComponent && !props[componentName]) {
+        props[componentName] = {}
+      }
+
+      Object.keys(properties).forEach(key => {
+        const propertyName = utils.casing.toCamelCase(key)
+
+        if (groupByComponent) {
+          if (!props[componentName][propertyName]) {
+            props[componentName][propertyName] = {
+              possibleValues: [properties[key]],
+              defaultValue:
+                propOverrides[propertyName] && propOverrides[propertyName].defaultValue
+                  ? propOverrides[propertyName].defaultValue
+                  : properties[key],
+              visible:
+                propOverrides[propertyName] &&
+                typeof propOverrides[propertyName].visible === 'boolean'
+                  ? propOverrides[propertyName].visible
+                  : true,
+            }
+
+            if (filterProps && props[componentName][propertyName].visible === false) {
+              delete props[componentName][propertyName]
+            }
+          } else {
+            if (
+              props[componentName][propertyName].possibleValues.indexOf(
+                properties[key]
+              ) === -1
+            ) {
+              props[componentName][propertyName].possibleValues.push(properties[key])
+            }
+          }
+        } else {
+          if (!propMap[propertyName]) {
+            propMap[propertyName] = {
+              possibleValues: [properties[key]],
+              defaultValue:
+                propOverrides[propertyName] && propOverrides[propertyName].defaultValue
+                  ? propOverrides[propertyName].defaultValue
+                  : properties[key],
+              visible:
+                propOverrides[propertyName] &&
+                typeof propOverrides[propertyName].visible === 'boolean'
+                  ? propOverrides[propertyName].visible
+                  : true,
+            }
+            if (filterProps && propMap[propertyName].visible === false) {
+              delete propMap[propertyName]
+            }
+          } else {
+            if (propMap[propertyName].possibleValues.indexOf(properties[key]) === -1) {
+              propMap[propertyName].possibleValues.push(properties[key])
+            }
+          }
+        }
       })
+    }
+
+    return groupByComponent ? props : propMap
+  }
+
+  static async extract(
+    ltrVariants: ComponentNode[],
+    rtlVariants: ComponentNode[],
+    propOverrides: PropConfig
+  ) {
+    const componentsToExport: Record<
+      string,
+      {
+        code: string
+        props: PropMap
+        hasRtl: boolean
+      }
+    > = {}
+    const componentProps = new Props([...ltrVariants, ...rtlVariants], propOverrides)
+
+    // Get all props from all possible components (LTR and RTL)
+    const allProps = componentProps.all()
+    const propsToRenderInComponent = componentProps.visibleAndWithMultiplePossibleValues()
+
+    // Export LTR (left-to-right) variants
+    for (let i = 0; i < ltrVariants.length; i++) {
+      // Build the component
+      const component = new Component(ltrVariants[i])
+      component.setComponentProps(propsToRenderInComponent[component.name])
+
+      // Skip hidden variants by the user
+      let skipVariant = false
+
+      Object.keys(component.properties).forEach(key => {
+        const propertyName = utils.casing.toCamelCase(key)
+
+        if (
+          allProps[component.name][propertyName].visible === false &&
+          allProps[component.name][propertyName].possibleValues.length > 1 &&
+          allProps[component.name][propertyName].defaultValue !==
+            component.properties[key]
+        ) {
+          skipVariant = true
+        }
+      })
+
+      if (skipVariant) continue
+
+      // Export SVG from figma
+      const svg = await component.getSVG()
 
       const hasRTLVariant =
         rtlVariants &&
-        !!rtlVariants.find(
-          variant =>
-            component.variantProperties &&
-            variant.variantProperties &&
-            component.variantProperties['Name'] === variant.variantProperties['Name']
-        )
+        !!rtlVariants.find(variant => {
+          const variantComponent = new Component(variant)
+          return component.name === variantComponent.name
+        })
 
-      if (!componentsToExport[componentName]) {
-        const condition = componentPropertiesAsConditionString(
-          variantProperties,
-          props[componentName]
-        )
-
-        componentsToExport[componentName] = {
+      const condition = component.conditionString
+      if (!componentsToExport[component.name]) {
+        componentsToExport[component.name] = {
           code: svg.replace(
             '<svg',
             `<svg v-if="${
               hasRTLVariant ? '!rtl' + (condition !== '' ? ' && ' : '') : ''
             }${condition}"`
           ),
-          props: props[componentName],
+          props: propsToRenderInComponent[component.name],
           hasRtl: false,
         }
       } else {
-        const condition = componentPropertiesAsConditionString(
-          variantProperties,
-          props[componentName]
-        )
-
-        componentsToExport[componentName].props = props[componentName]
-        componentsToExport[componentName].code +=
+        componentsToExport[component.name].code +=
           '\n' +
           svg.replace(
             '<svg',
@@ -80,55 +170,49 @@ export default class VueExtractor {
 
     // Export RTL (right-to-left) variants
     for (let i = 0; i < rtlVariants.length; i++) {
-      const component = rtlVariants[i] as ComponentNode
+      // Build the component
+      const component = new Component(rtlVariants[i])
+      component.setComponentProps(propsToRenderInComponent[component.name])
 
-      /**
-       * Builds the component name
-       * (uses the variant property "name" if exists, otherwise just the "component name")
-       */
-      const componentName = utils.components.formatName(
-        !component.variantProperties || !component.variantProperties['Name']
-          ? component.name
-          : component.variantProperties['Name']
-      )
+      let skipVariant = false
 
-      const svg = await component.exportAsync({
-        format: 'SVG_STRING',
+      Object.keys(component.properties).forEach(key => {
+        const propertyName = utils.casing.toCamelCase(key)
+
+        if (
+          allProps[component.name][propertyName].visible === false &&
+          allProps[component.name][propertyName].possibleValues.length > 1 &&
+          allProps[component.name][propertyName].defaultValue !==
+            component.properties[key]
+        ) {
+          skipVariant = true
+        }
       })
 
-      const variantProperties = component.variantProperties
-        ? filterComponentProperties(component.variantProperties)
-        : {}
+      if (skipVariant) continue
 
-      if (!componentsToExport[componentName]) {
-        const condition = componentPropertiesAsConditionString(
-          variantProperties,
-          props[componentName]
-        )
+      // Export SVG from figma
+      const svg = await component.getSVG()
 
-        componentsToExport[componentName] = {
+      const condition = component.conditionString
+      if (!componentsToExport[component.name]) {
+        componentsToExport[component.name] = {
           code: svg.replace(
             '<svg',
             `<svg v-if="rtl${condition !== '' ? ' && ' + condition : ''}"`
           ),
-          props: props[componentName],
+          props: propsToRenderInComponent[component.name],
           hasRtl: true,
         }
       } else {
-        const condition = componentPropertiesAsConditionString(
-          variantProperties,
-          props[componentName]
-        )
-
-        componentsToExport[componentName].code +=
+        componentsToExport[component.name].code +=
           '\n' +
           svg.replace(
             '<svg',
             `<svg v-else-if="rtl${condition !== '' ? ' && ' + condition : ''}"`
           )
 
-        componentsToExport[componentName].props = props[componentName]
-        componentsToExport[componentName].hasRtl = true
+        componentsToExport[component.name].hasRtl = true
       }
     }
 
@@ -138,81 +222,7 @@ export default class VueExtractor {
   }
 }
 
-const extractComponentProps = (figmaComponents: ComponentNode[]) => {
-  const props: { [componentName: string]: VuePropMap } = {}
-
-  for (let i = 0; i < figmaComponents.length; i++) {
-    const component = figmaComponents[i] as ComponentNode
-    const properties = component.variantProperties
-      ? filterComponentProperties(component.variantProperties)
-      : {}
-
-    const componentName = utils.components.formatName(
-      !component.variantProperties || !component.variantProperties['Name']
-        ? component.name
-        : component.variantProperties['Name']
-    )
-
-    if (!props[componentName]) {
-      props[componentName] = {}
-    }
-
-    Object.keys(properties).forEach(key => {
-      const propertyName = utils.casing.toCamelCase(key)
-
-      if (!props[componentName][propertyName]) {
-        props[componentName][propertyName] = {
-          possibleValues: [properties[key]],
-          defaultValue: properties[key],
-        }
-      } else {
-        if (
-          props[componentName][propertyName].possibleValues.indexOf(properties[key]) ===
-          -1
-        ) {
-          props[componentName][propertyName].possibleValues.push(properties[key])
-        }
-      }
-    })
-  }
-
-  return props
-}
-
-const filterComponentProperties = (componentProperties: { [name: string]: string }) => {
-  const filteredProperties: { [key: string]: string } = {}
-
-  Object.keys(componentProperties).forEach(key => {
-    if (['Name'].indexOf(key) === -1) {
-      filteredProperties[key] = componentProperties[key]
-    }
-  })
-
-  return filteredProperties
-}
-
-const componentPropertiesAsConditionString = (
-  componentProperties: {
-    [name: string]: string
-  },
-  props: VuePropMap
-) => {
-  let str = ''
-
-  Object.keys(componentProperties).forEach(prop => {
-    const propName = utils.casing.toCamelCase(prop)
-
-    if (props[propName].possibleValues.length > 1) {
-      if (str !== '') str += ' && '
-
-      str += propName + " === '" + componentProperties[prop] + "'"
-    }
-  })
-
-  return str
-}
-
-const componentPropsAsString = (props: VuePropMap, hasRtl: boolean = false) => {
+const componentPropsAsString = (props: PropMap, hasRtl: boolean = false) => {
   let propsStr = ''
 
   Object.keys(props).forEach(propName => {
@@ -274,7 +284,7 @@ __COMPONENT_PROPS__
 const getSFCs = (components: {
   [componentName: string]: {
     code: string
-    props: VuePropMap
+    props: PropMap
     hasRtl: boolean
   }
 }) => {

@@ -2,7 +2,7 @@ import type { ClientStorage } from '../../../../types'
 
 export const ClientStorageProps: {
   name: keyof ClientStorage
-  defaultValue: string | boolean | number
+  defaultValue: string | boolean | number | object
 }[] = [
   {
     name: 'exportFormat',
@@ -59,5 +59,9 @@ export const ClientStorageProps: {
   {
     name: 'accessToken',
     defaultValue: '',
+  },
+  {
+    name: 'propOverrides',
+    defaultValue: {},
   },
 ]

@@ -69,6 +69,15 @@ async function onMessageEvent(payload: PostMessageEvent) {
 
     return await exportAssets(payload.data)
   }
+
+  if (payload.event === 'get-available-props') {
+    if (!payload.data) {
+      const error = 'Missing required "data" property for event "export-assets".'
+      throw new Error(error)
+    }
+
+    return emitAvailableProps(payload.data)
+  }
 }
 
 /** Handles the assets export action */
@@ -97,7 +106,7 @@ async function exportAssets(data: ClientStorage) {
     if (data.exportFormat === 'SVG') {
       exportableComponents = await SvgExtractor.extract(ltrFigmaComponents)
     } else if (data.exportFormat === 'Vue') {
-      exportableComponents = await VueExtractor.extract(ltrFigmaComponents, rtlVariants)
+      exportableComponents = await VueExtractor.extract(ltrFigmaComponents, rtlVariants, data.propOverrides)
     }
 
     // Add suffix to every file name
@@ -123,11 +132,11 @@ async function exportAssets(data: ClientStorage) {
     await github.exportFiles({
       baseBranchName: data.targetBranch,
       headBranchName: PluginConfig.github.headBranch,
+      createDefaultExportsFile,
       components: exportableComponents,
       extension: data.exportFormat === 'SVG' ? 'svg' : 'vue',
       commitMessage: PluginConfig.github.commitMessage,
       destinationFolder: data.destinationFolder,
-      createDefaultExportsFile: createDefaultExportsFile,
       defaultExportsFileExtension: data.createDefaultExportsJsFile ? 'js' : 'ts',
     })
 
@@ -138,4 +147,36 @@ async function exportAssets(data: ClientStorage) {
     // eslint-disable-next-line no-console
     console.error(error)
   }
+}
+
+function emitAvailableProps(data: ClientStorage) {
+  if (!data.selectedPageId || !data.selectedBoardId) {
+    data.selectedPageId = figma.currentPage.id
+    data.selectedBoardId = figma.currentPage.children[0]?.id
+  }
+
+  const ltrFigmaComponents: ComponentNode[] = getComponentsByPageAndBoardId(
+    data.selectedPageId,
+    data.selectedBoardId
+  )
+
+  let rtlVariants: ComponentNode[] = []
+  if (data.rtlEnabled && data.exportFormat !== 'SVG') {
+    rtlVariants = getComponentsByPageAndBoardId(
+      data.selectedRTLPageId,
+      data.selectedRTLBoardId
+    )
+  }
+
+  const props = VueExtractor.extractComponentProps(
+    [...ltrFigmaComponents, ...rtlVariants],
+    false,
+    data.propOverrides,
+    false
+  )
+
+  figma.ui.postMessage({
+    event: 'available-props',
+    props,
+  })
 }

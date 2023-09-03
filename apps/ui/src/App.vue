@@ -5,8 +5,8 @@
 
   <TabView :tabs="tabs">
     <template #default="{ selectedTab }">
-      <AssetConfiguration v-if="selectedTab === 'asset-configurations'" />
-      <FigmaConfiguration v-else-if="selectedTab === 'figma-configurations'" />
+      <FigmaConfiguration v-if="selectedTab === 'figma-configurations'" />
+      <AssetConfiguration v-else-if="selectedTab === 'asset-configurations'" />
       <GithubConfiguration v-else-if="selectedTab === 'github-configurations'" />
     </template>
 
@@ -23,6 +23,7 @@
 </template>
 
 <script lang="ts">
+import cloneDeep from 'lodash/cloneDeep'
 import TabView from '@/components/Navigation/TabView.vue'
 import FigmaConfiguration from '@/views/FigmaConfiguration.vue'
 import AssetConfiguration from '@/views/AssetConfiguration.vue'
@@ -60,6 +61,15 @@ export default {
         figma.setCurrentPage(event.data.pluginMessage.currentPage)
         figma.setClientStorage(event.data.pluginMessage.storage)
         figma.setDefaultClientStorageValues()
+        parent.postMessage(
+          {
+            pluginMessage: {
+              event: 'get-available-props',
+              data: { ...event.data.pluginMessage.storage },
+            },
+          },
+          '*'
+        )
       } else if (event.data.pluginMessage.event === 'export-completed') {
         // Show success state
         figma.setExporting(false)
@@ -68,6 +78,8 @@ export default {
         setTimeout(() => {
           success.value = false
         }, 3000)
+      } else if (event.data.pluginMessage.event === 'available-props') {
+        figma.setAvailableProps(event.data.pluginMessage.props)
       }
     }
 
@@ -84,12 +96,12 @@ export default {
     tabs() {
       return [
         {
-          id: 'asset-configurations',
-          label: 'Assets',
-        },
-        {
           id: 'figma-configurations',
           label: 'Figma',
+        },
+        {
+          id: 'asset-configurations',
+          label: 'Assets',
         },
         {
           id: 'github-configurations',
@@ -110,7 +122,7 @@ export default {
           {
             pluginMessage: {
               event: 'export-assets',
-              data: { ...this.clientStorage },
+              data: cloneDeep(this.clientStorage),
             },
           },
           '*'

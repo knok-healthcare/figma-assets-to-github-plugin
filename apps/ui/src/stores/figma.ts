@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia'
-import type { ClientStorage, ExportableFormat } from '../../../../types'
+import type {
+  ClientStorage,
+  ExportableFormat,
+  VueProp,
+  VuePropMap,
+} from '../../../../types'
 
 export const useFigmaStore = defineStore('figma', {
   state: () => ({
@@ -23,7 +28,15 @@ export const useFigmaStore = defineStore('figma', {
       repositoryOwner: '',
       targetBranch: '',
       destinationFolder: '',
+
+      propOverrides: {
+        name: {
+          visible: false,
+        },
+      },
     } as ClientStorage,
+
+    availableProps: {} as VuePropMap,
 
     /** Defines if the export process is in progress or not */
     exporting: false,
@@ -66,6 +79,11 @@ export const useFigmaStore = defineStore('figma', {
       this.clientStorage = clientStorage
     },
 
+    /** Defines the available props retrieved from figma */
+    setAvailableProps(props: VuePropMap) {
+      this.availableProps = props
+    },
+
     setDefaultClientStorageValues() {
       if (
         !this.clientStorage.selectedPageId ||
@@ -96,6 +114,58 @@ export const useFigmaStore = defineStore('figma', {
             event: 'update-client-storage-field',
             field,
             value,
+          },
+        },
+        '*'
+      )
+    },
+
+    updateAvailablePropVisibility(
+      propName: keyof typeof this.availableProps,
+      visibility: boolean
+    ) {
+      if (!this.clientStorage.propOverrides[propName]) {
+        this.clientStorage.propOverrides[propName] = {
+          defaultValue: this.availableProps[propName].defaultValue || ''
+        } as VueProp
+      }
+
+      this.clientStorage.propOverrides[propName].visible = visibility
+      this.availableProps[propName].visible = visibility
+
+      // Propagates the event to the Figma "back-end" handler
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: 'update-client-storage-field',
+            field: 'propOverrides',
+            value: JSON.parse(JSON.stringify(this.clientStorage.propOverrides)),
+          },
+        },
+        '*'
+      )
+    },
+
+    updateAvailablePropDefaultValue(
+      propName: keyof typeof this.availableProps,
+      defaultValue: string
+    ) {
+      if (!this.clientStorage.propOverrides[propName]) {
+        this.clientStorage.propOverrides[propName] = {
+          visible: this.availableProps[propName].visible || true,
+        } as VueProp
+      }
+
+      this.clientStorage.propOverrides[propName].defaultValue = defaultValue
+      this.availableProps[propName].defaultValue = defaultValue
+
+      // Propagates the event to the Figma "back-end" handler
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: 'update-client-storage-field',
+            field: 'propOverrides',
+            value: JSON.parse(JSON.stringify(this.clientStorage.propOverrides)),
           },
         },
         '*'
