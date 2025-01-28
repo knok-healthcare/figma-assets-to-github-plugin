@@ -1,7 +1,8 @@
 <template>
   <div
     class="input-group"
-    :data-inline="inline">
+    :data-inline="inline"
+    :data-fill="fill">
     <slot></slot>
   </div>
 </template>
@@ -12,6 +13,11 @@ export default {
 
   props: {
     inline: {
+      type: Boolean,
+      default: false,
+    },
+
+    fill: {
       type: Boolean,
       default: false,
     },
@@ -44,6 +50,7 @@ export default {
   }
 
   label {
+    min-width: 30px;
     margin-bottom: 4px;
     font-size: 11.5px;
     font-weight: 600;
@@ -68,6 +75,7 @@ export default {
   input,
   select {
     padding: 8px;
+    font-size: 11px;
     border: 1px solid #bcbcbc;
     border-radius: 3px;
     outline: none;
@@ -79,6 +87,10 @@ export default {
 
   input[type="checkbox"] ~ label {
     margin-left: 4px;
+  }
+
+  &[data-fill='true'] input {
+    flex-grow: 1;
   }
 }
 </style>

@@ -1,58 +1,63 @@
-/**
- * Valid file formats for exporting
- *
- * @TODO: Add support for other formats (e.g. React, default web components, ...)
- */
-export type ExportableFormat = 'SVG' | 'Vue'
-
-/**
- * Application settings storied in
- * figma "clientStorage"
- */
-export type ClientStorage = {
-  /** Defines the format of the files that will be exported. */
-  exportFormat: ExportableFormat
-  /** A suffix to append to the end of the name of every file when exporting */
-  fileSuffix: string
-  /** Defines if the exported components should include RTL variants or not. */
-  rtlEnabled: boolean
-  /** Defines if the plugin should create a javascript file with default exports of all assets in the destination folder */
-  createDefaultExportsJsFile: boolean
-  /** Defines if the plugin should create a typescript file with default exports of all assets in the destination folder */
-  createDefaultExportsTsFile: boolean
-  /** The main figma page that contains the board with components to export. */
-  selectedPageId: string
-  /** The main board where the plugin will look for figma components to export. */
-  selectedBoardId: string
-  /** The figma page that contains the board with RTL variants of components to export. */
-  selectedRTLPageId: string
-  /** The board where the plugin will look for RTL variants of components to export. */
-  selectedRTLBoardId: string
-  /** A github "Personal Access Token" with permissions to the specified repository. */
-  accessToken: string
-  /** Github repository name. */
-  repositoryName: string
-  /** The github account that owns the repository. */
-  repositoryOwner: string
-  /** The base/target branch for our PR. */
-  targetBranch: string
-  /** The destination folder inside the repository where our assets will be exported to. */
-  destinationFolder: string
-  /** Object containing custom configurations for variant properties defined in Figma */
-  propOverrides: {
-    [propName: string]: {
-      visible: boolean
-      defaultValue?: string | number | boolean | null
+export type PluginConfig = {
+  id: string
+  name: string
+  settings: {
+    figma: {
+      /**
+       * The figma page where the plugin will look for assets to export.
+       *
+       * @type {string}
+       */
+      pageId: string,
+      /**
+       * A list of assets (InstanceNodes, ComponentSetNodes, etc)
+       * that will be exported from Figma to code.
+       *
+       * @type {string[]}
+       */
+      assetIds: string[]
+    },
+    code: {
+      format: ExportableFormat,
+      /**
+       * Object containing custom configurations
+       * for variant properties defined in Figma
+       */
+      properties: {
+        /**
+         * Figma Asset Property
+         *
+         * @type {{
+         *  visible: boolean,
+         *  defaultValue?: string | number | boolean | null
+         * }} Defines if a property will be exported and its default value
+         */
+        [propName: string]: {
+          visible: boolean,
+          defaultValue?: string | number | boolean | null
+        }
+      }
+    },
+    export: {
+      prefixToAdd: string,
+      prefixToRemove: string,
+      suffixToAdd: string,
+      suffixToRemove: string,
+      defaultExportsFile: string
+    },
+    github: {
+      repository: string,
+      branch: string,
+      path: string,
+      accessToken: string
     }
   }
 }
 
-export type VueProp = {
-  visible: boolean
-  defaultValue: string | number | boolean
-  possibleValues: string[]
-}
-
-export type VuePropMap = {
-  [propName: string]: VueProp
-}
+/**
+ * Defines the valid formats for the exported assets
+ * (SVG and Vue for now, but expecting more formats in the future)
+ *
+ * @type {'SVG' | 'Vue'}
+ */
+export type ExportableFormat = 'SVG' | 'Vue'

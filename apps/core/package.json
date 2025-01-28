@@ -10,9 +10,9 @@
         "dev": "vite build --watch"
     },
     "dependencies": {
-        "@packages/github-connector": "*",
-        "@packages/svg-extractor": "*",
-        "@packages/vue-extractor": "*"
+        "@packages/github-connector": "workspace:*",
+        "@packages/svg-extractor": "workspace:*",
+        "@packages/vue-extractor": "workspace:*"
     },
     "devDependencies": {
         "typescript": "^4.6.4",

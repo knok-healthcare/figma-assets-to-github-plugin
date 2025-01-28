@@ -46,20 +46,22 @@ export default {
 <style lang="scss" scoped>
 .tab-element {
   padding: 10px 18px;
-  color: var(--main-color);
+  color: var(--main-color-light);
+  white-space: nowrap;
   cursor: pointer;
   background: transparent;
   border: none;
   border-radius: 0;
   transition: background-color 150ms ease-in-out;
 
-  &:hover {
-    background-color: rgb(0 0 0 / 10%);
+  &[data-selected="false"]:hover {
+    background-color: rgb(0 0 0 / 7%);
   }
 
   &[data-selected="true"] {
     font-weight: 600;
-    border-bottom: 2px solid var(--main-color);
+    color: var(--main-color);
+    background-color: rgb(0 0 0 / 12%);
   }
 }
 </style>

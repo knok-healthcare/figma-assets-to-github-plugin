@@ -6,7 +6,7 @@
     "author": "knok-healthcare",
     "license": "MIT",
     "dependencies": {
-        "@packages/utils": "*"
+        "@packages/utils": "workspace:*"
     },
     "devDependencies": {
         "typescript": "^4.6.4"

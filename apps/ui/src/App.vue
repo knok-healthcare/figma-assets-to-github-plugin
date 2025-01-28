@@ -1,143 +1,189 @@
 <template>
-  <ExportingState v-if="exporting" />
+  <Tabs
+    :value="selectedTabIndex"
+    scrollable
+    lazy
+    class="tab-navigation"
+    @update:value="selectedTabIndex = $event">
+    <TabList>
+      <Tab
+        v-for="(tab, tabIndex) in tabs"
+        :key="tab.id"
+        :value="tabIndex">
+        {{ tab.label }}
+      </Tab>
+    </TabList>
+  </Tabs>
 
-  <ExportedSuccessfullyState v-else-if="success" />
+  <SpeedDial
+    :model="actions"
+    direction="down"
+    show-icon="pi pi-bars"
+    hide-icon="pi pi-times"
+    :button-props="{
+      size: 'small',
+      variant: 'outlined',
+    }"
+    :tooltip-options="{ position: 'right' }"
+    style="position: absolute; top: 9px; right: 12px;"
+  />
 
-  <TabView :tabs="tabs">
-    <template #default="{ selectedTab }">
-      <FigmaConfiguration v-if="selectedTab === 'figma-configurations'" />
-      <AssetConfiguration v-else-if="selectedTab === 'asset-configurations'" />
-      <GithubConfiguration v-else-if="selectedTab === 'github-configurations'" />
+  <PluginConfigForm :selected-config-id="selectedTab.id" />
+  <!--<TabView :tabs="tabs">
+    <template #navigation>
+      <Tab
+        id="create-new-tab"
+        label="+ &nbsp;New config"
+        @selected="addEmptyPluginConfig"
+      />
     </template>
 
-    <template #footer>
-      <button
-        id="exportAssetsButton"
-        class="export-assets-button"
-        @click="onExportButtonClick"
-      >
-        Export
+    <template #default="{ selectedTab }">
+      <PluginConfigForm :selected-config-id="selectedTab.id" />
+    </template>
+
+    <template #footer="{ selectedTab }">
+      <button @click="exportAssets(selectedTab)">
+        Export to Github
       </button>
     </template>
-  </TabView>
+  </TabView>-->
 </template>
 
 <script lang="ts">
-import cloneDeep from 'lodash/cloneDeep'
-import TabView from '@/components/Navigation/TabView.vue'
-import FigmaConfiguration from '@/views/FigmaConfiguration.vue'
-import AssetConfiguration from '@/views/AssetConfiguration.vue'
-import GithubConfiguration from '@/views/GithubConfiguration.vue'
-import ExportingState from '@/states/Exporting.vue'
-import ExportedSuccessfullyState from '@/states/ExportedSuccessfully.vue'
-import { useFigmaStore } from '@/stores/figma'
-import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import type { PluginConfig } from '@typings/index';
+import { defineComponent, Ref, ref } from 'vue';
+// Layout
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import SpeedDial from 'primevue/speeddial';
+// View States
+//
+// Data Stores
+import { useConfigStore } from '@/stores/config'
+// Views
+import PluginConfigForm from '@/forms/PluginConfig/PluginConfigForm.vue'
+import { useFigmaStore } from './stores/figma';
+import { useDarkMode } from './composables/useDarkMode';
 
-export default {
+export default defineComponent({
   name: 'App',
 
   components: {
-    TabView,
+    Tabs,
+    TabList,
+    Tab,
+    SpeedDial,
     // "Views"
-    FigmaConfiguration,
-    AssetConfiguration,
-    GithubConfiguration,
-    // States
-    ExportingState,
-    ExportedSuccessfullyState
+    PluginConfigForm,
+    // View States
+
   },
 
   setup() {
-    const figma = useFigmaStore()
-    const { clientStorage, exporting } = storeToRefs(figma)
+    const { isDarkMode, toggleDarkMode } = useDarkMode()
 
-    /** Defines if the export process finished successfully */
-    const success = ref(false)
+    const configStore = useConfigStore()
+    const figmaStore = useFigmaStore()
+    const selectedTabIndex = ref(0) as Ref<number>
 
-    /** Defines a callback for messages sent by the plugin core */
     onmessage = event => {
       if (event.data.pluginMessage.event === 'initial-data') {
-        figma.setCurrentPage(event.data.pluginMessage.currentPage)
-        figma.setClientStorage(event.data.pluginMessage.storage)
-        figma.setDefaultClientStorageValues()
-        parent.postMessage(
-          {
-            pluginMessage: {
-              event: 'get-available-props',
-              data: { ...event.data.pluginMessage.storage },
-            },
-          },
-          '*'
-        )
-      } else if (event.data.pluginMessage.event === 'export-completed') {
-        // Show success state
-        figma.setExporting(false)
-        success.value = true
-
-        setTimeout(() => {
-          success.value = false
-        }, 3000)
-      } else if (event.data.pluginMessage.event === 'available-props') {
-        figma.setAvailableProps(event.data.pluginMessage.props)
+        console.log('initial-data', event.data.pluginMessage)
+        figmaStore.setCurrentPage(event.data.pluginMessage.currentPage)
+        console.log(configStore.pluginConfigs, figmaStore.currentPage)
       }
     }
 
     return {
-      clientStorage,
-      exporting,
-      success,
-
-      setExporting: figma.setExporting
+      pluginConfigs: configStore.pluginConfigs,
+      addPluginConfig: configStore.addPluginConfig,
+      selectedTabIndex,
+      isDarkMode,
+      toggleDarkMode: toggleDarkMode
     }
   },
 
   computed: {
-    tabs() {
-      return [
-        {
-          id: 'figma-configurations',
-          label: 'Figma',
-        },
-        {
-          id: 'asset-configurations',
-          label: 'Assets',
-        },
-        {
-          id: 'github-configurations',
-          label: 'Github',
-        },
-      ]
+    hasPluginConfigs() {
+      return this.pluginConfigs.length > 0
     },
+
+    tabs() {
+      return this.pluginConfigs.map((pluginConfig: PluginConfig) => ({
+        id: pluginConfig.id,
+        label: pluginConfig.name,
+        settings: pluginConfig.settings
+      }))
+    },
+
+    selectedTab() {
+      return this.tabs[this.selectedTabIndex]
+    },
+
+    actions() {
+      return [
+        { icon: 'pi pi-plus', label: 'Add new config', command: () => this.addEmptyPluginConfig() },
+        // action to toggle light/dark mode
+        { icon: this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon',
+          label: this.isDarkMode ? 'Light mode' : 'Dark mode',
+          command: () => this.toggleDarkMode()
+        }
+      ]
+    }
+  },
+
+  created() {
+    if (!this.hasPluginConfigs) this.addEmptyPluginConfig()
   },
 
   methods: {
-    onExportButtonClick() {
-      this.setExporting(true)
-
-      // ⚒️ Allow loading animation to start before performing postMessage
-      // as this operating will "block" the main thread for a moment
-      setTimeout(() => {
-        parent.postMessage(
-          {
-            pluginMessage: {
-              event: 'export-assets',
-              data: cloneDeep(this.clientStorage),
-            },
+    addEmptyPluginConfig() {
+      this.addPluginConfig({
+        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        name: `Config ${this.pluginConfigs.length + 1}`,
+        settings: {
+          figma: {
+            pageId: '',
+            assetIds: []
           },
-          '*'
-        )
-      }, 250)
+          code: {
+            format: 'SVG',
+            properties: {}
+          },
+          export: {
+            prefixToAdd: '',
+            prefixToRemove: '',
+            suffixToAdd: '',
+            suffixToRemove: '',
+            defaultExportsFile: ''
+          },
+          github: {
+            repository: '',
+            branch: '',
+            path: '',
+            accessToken: ''
+          },
+        }
+      })
     },
-  },
-}
+
+    exportAssets(tab: TabModel) {
+      console.log('exportAssets', tab)
+    }
+  }
+})
 </script>
 
-<style>
+<style lang="scss">
+@import 'primeicons/primeicons.css';
+
 :root {
   --font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans',
     arial, sans-serif;
   --main-color: #000;
+  --main-color-light: #333;
   --void-color: #fff;
 }
 
@@ -154,6 +200,14 @@ body {
   line-height: 20px;
 }
 
+.tab-navigation {
+  max-width: calc(100% - 50px);
+
+  .p-tablist-tab-list {
+    border-color: transparent;
+  }
+}
+
 h6 {
   margin-top: 12px;
   margin-bottom: 4px;
@@ -167,14 +221,11 @@ h6:first-child {
   margin-top: 0;
 }
 
-button {
-  padding: 10px 18px;
-  font-size: 12px;
-  color: var(--void-color);
-  cursor: pointer;
-  background-color: var(--main-color);
-  border: none;
-  border-radius: 6px;
+.add-tab-button {
+  min-width: 25px;
+  max-width: 25px;
+  height: 25px;
+  margin: auto 0 auto 12px;
 }
 
 .export-assets-button {

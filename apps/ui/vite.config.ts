@@ -5,7 +5,10 @@ import { fileURLToPath, URL } from "node:url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [VuePlugin(), viteSingleFile()],
+  plugins: [
+    VuePlugin(),
+    viteSingleFile()
+  ],
   build: {
     cssCodeSplit: false,
     assetsInlineLimit: 100000000,
@@ -21,6 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@root": fileURLToPath(new URL("../../", import.meta.url)),
     },
   },
 });

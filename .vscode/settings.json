@@ -3,9 +3,9 @@
   "editor.formatOnSave": false,
   "eslint.format.enable": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.organizeImports": false,
-    "source.fixAll.stylelint": true
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never",
+    "source.fixAll.stylelint": "explicit"
   },
 
   // Disable Vetur as we use Volar now

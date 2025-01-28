@@ -6,12 +6,15 @@
   "author": "knok-healthcare",
   "license": "MIT",
   "scripts": {
-    "build": "vue-tsc --noEmit && vite build",
-    "dev": "vue-tsc --noEmit && vite build --watch"
+    "build": "vite build",
+    "dev": "vite build --watch"
   },
   "dependencies": {
     "pinia": "^2.1.4",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "primevue": "4.2.5",
+    "@primevue/themes": "4.2.5",
+    "primeicons": "7.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.197",

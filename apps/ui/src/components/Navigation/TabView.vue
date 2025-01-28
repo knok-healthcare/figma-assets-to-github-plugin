@@ -6,8 +6,13 @@
         :id="tab.id"
         :key="tab.id"
         :label="tab.label"
-        :selected="tab.id === selectedTab"
+        :selected="tab.id === selectedTabId"
         @selected="setSelectedTab"
+      />
+
+      <slot
+        name="navigation"
+        :selected-tab="selectedTab"
       />
     </nav>
 
@@ -18,7 +23,10 @@
     <footer
       v-if="!!$slots.footer"
       class="tab-view--footer">
-      <slot name="footer"></slot>
+      <slot
+        name="footer"
+        :selected-tab="selectedTab"
+      />
     </footer>
   </div>
 </template>
@@ -47,17 +55,23 @@ export default {
 
   data() {
     return {
-      selectedTab: "",
+      selectedTabId: "",
     };
   },
 
+  computed: {
+    selectedTab() {
+      return this.tabs.find(tab => tab.id === this.selectedTabId);
+    },
+  },
+
   created() {
-    this.selectedTab = this.tabs[0].id;
+    this.selectedTabId = this.tabs[0].id;
   },
 
   methods: {
     setSelectedTab(selectedTab: string) {
-      this.selectedTab = selectedTab;
+      this.selectedTabId = selectedTab;
     },
   },
 };
@@ -71,9 +85,24 @@ export default {
   height: 100%;
 
   &--navigation {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
     width: 100%;
+    min-height: 36px;
+    overflow-x: auto;
+    background-color: var(--void-color);
     border-bottom: 1px solid var(--main-color);
+
+    &::-webkit-scrollbar {
+      height: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--main-color);
+      border-radius: 6px;
+    }
   }
 
   &--content {
