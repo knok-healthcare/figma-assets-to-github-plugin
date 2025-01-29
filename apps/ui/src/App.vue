@@ -10,7 +10,20 @@
         v-for="(tab, tabIndex) in tabs"
         :key="tab.id"
         :value="tabIndex">
-        {{ tab.label }}
+        <span
+          contenteditable
+          @input="e => pluginConfigs[tabIndex].name = e.target?.innerText">
+          {{ tab.label }}
+        </span>
+
+        <Button
+          v-if="tabs.length > 1"
+          size="small"
+          variant="outlined"
+          severity="danger"
+          icon="pi pi-times"
+          class="delete-tab-button"
+          @click.stop="deleteTab(tabIndex)" />
       </Tab>
     </TabList>
   </Tabs>
@@ -28,26 +41,9 @@
     style="position: absolute; top: 9px; right: 12px;"
   />
 
-  <PluginConfigForm :selected-config-id="selectedTab.id" />
-  <!--<TabView :tabs="tabs">
-    <template #navigation>
-      <Tab
-        id="create-new-tab"
-        label="+ &nbsp;New config"
-        @selected="addEmptyPluginConfig"
-      />
-    </template>
-
-    <template #default="{ selectedTab }">
-      <PluginConfigForm :selected-config-id="selectedTab.id" />
-    </template>
-
-    <template #footer="{ selectedTab }">
-      <button @click="exportAssets(selectedTab)">
-        Export to Github
-      </button>
-    </template>
-  </TabView>-->
+  <PluginConfigForm
+    v-if="gotInitialData"
+    :selected-config-id="selectedTab.id" />
 </template>
 
 <script lang="ts">
@@ -58,13 +54,13 @@ import Tabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import SpeedDial from 'primevue/speeddial';
-// View States
-//
+import Button from 'primevue/button';
 // Data Stores
 import { useConfigStore } from '@/stores/config'
+import { useFigmaStore } from '@/stores/figma';
 // Views
 import PluginConfigForm from '@/forms/PluginConfig/PluginConfigForm.vue'
-import { useFigmaStore } from './stores/figma';
+// Composables
 import { useDarkMode } from './composables/useDarkMode';
 
 export default defineComponent({
@@ -75,9 +71,8 @@ export default defineComponent({
     TabList,
     Tab,
     SpeedDial,
-    // "Views"
+    Button,
     PluginConfigForm,
-    // View States
 
   },
 
@@ -87,18 +82,32 @@ export default defineComponent({
     const configStore = useConfigStore()
     const figmaStore = useFigmaStore()
     const selectedTabIndex = ref(0) as Ref<number>
+    const gotInitialData = ref(false)
 
     onmessage = event => {
       if (event.data.pluginMessage.event === 'initial-data') {
-        console.log('initial-data', event.data.pluginMessage)
+        configStore.initializePluginConfigs(event.data.pluginMessage.storage)
+
         figmaStore.setCurrentPage(event.data.pluginMessage.currentPage)
-        console.log(configStore.pluginConfigs, figmaStore.currentPage)
+        figmaStore.setPages(event.data.pluginMessage.currentPage.parent?.children)
+
+        gotInitialData.value = true
+      }
+
+      if (event.data.pluginMessage.event === 'available-properties') {
+        configStore.setConfigProperties(
+          selectedTabIndex.value,
+          event.data.pluginMessage.properties
+        )
+
+        figmaStore.setPropertiesFromPageAssets(event.data.pluginMessage.properties)
       }
     }
 
     return {
+      gotInitialData,
       pluginConfigs: configStore.pluginConfigs,
-      addPluginConfig: configStore.addPluginConfig,
+      addEmptyPluginConfig: configStore.addEmptyPluginConfig,
       selectedTabIndex,
       isDarkMode,
       toggleDarkMode: toggleDarkMode
@@ -106,10 +115,6 @@ export default defineComponent({
   },
 
   computed: {
-    hasPluginConfigs() {
-      return this.pluginConfigs.length > 0
-    },
-
     tabs() {
       return this.pluginConfigs.map((pluginConfig: PluginConfig) => ({
         id: pluginConfig.id,
@@ -119,6 +124,8 @@ export default defineComponent({
     },
 
     selectedTab() {
+      if (!this.tabs.length) return {}
+
       return this.tabs[this.selectedTabIndex]
     },
 
@@ -134,43 +141,40 @@ export default defineComponent({
     }
   },
 
-  created() {
-    if (!this.hasPluginConfigs) this.addEmptyPluginConfig()
-  },
-
   methods: {
-    addEmptyPluginConfig() {
-      this.addPluginConfig({
-        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-        name: `Config ${this.pluginConfigs.length + 1}`,
-        settings: {
-          figma: {
-            pageId: '',
-            assetIds: []
+    deleteTab(tabIndex: number) {
+      if (this.selectedTabIndex >= this.tabs.length - 1) {
+        this.selectedTabIndex = this.tabs.length - 2
+      }
+
+      this.pluginConfigs.splice(tabIndex, 1)
+
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: 'update-plugin-configs',
+            value: JSON.stringify(this.pluginConfigs),
           },
-          code: {
-            format: 'SVG',
-            properties: {}
-          },
-          export: {
-            prefixToAdd: '',
-            prefixToRemove: '',
-            suffixToAdd: '',
-            suffixToRemove: '',
-            defaultExportsFile: ''
-          },
-          github: {
-            repository: '',
-            branch: '',
-            path: '',
-            accessToken: ''
-          },
-        }
-      })
+        },
+        '*'
+      )
     },
 
-    exportAssets(tab: TabModel) {
-      console.log('exportAssets', tab)
+    editTabName(tabId: string) {
+      const tab = this.pluginConfigs.find(tab => tab.id === tabId)
+      if (!tab) return
+
+      tab.name = prompt('Enter new name', tab.name) || tab.name
+
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: 'update-plugin-configs',
+            value: JSON.stringify(this.pluginConfigs),
+          },
+        },
+        '*'
+      )
     }
   }
 })
@@ -182,13 +186,14 @@ export default defineComponent({
 :root {
   --font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans',
     arial, sans-serif;
-  --main-color: #000;
-  --main-color-light: #333;
-  --void-color: #fff;
 }
 
 * {
   box-sizing: border-box;
+}
+
+.w-full {
+  width: 100%;
 }
 
 html,
@@ -196,8 +201,7 @@ body {
   padding: 0;
   margin: 0;
   font-family: var(--font-family);
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 13px;
 }
 
 .tab-navigation {
@@ -208,27 +212,12 @@ body {
   }
 }
 
-h6 {
-  margin-top: 12px;
-  margin-bottom: 4px;
-  font-weight: bold;
-  color: #bcbcbc;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
+.delete-tab-button,
+.edit-tab-button {
+  --p-button-icon-only-width: 18px;
 
-h6:first-child {
-  margin-top: 0;
-}
-
-.add-tab-button {
-  min-width: 25px;
-  max-width: 25px;
-  height: 25px;
-  margin: auto 0 auto 12px;
-}
-
-.export-assets-button {
-  font-weight: 600;
+  height: 18px;
+  margin-left: 6px;
+  font-size: 11px;
 }
 </style>

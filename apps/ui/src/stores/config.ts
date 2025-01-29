@@ -2,13 +2,53 @@ import { defineStore } from 'pinia'
 import type { PluginConfig } from '@typings/index'
 
 export const useConfigStore = defineStore('config', {
-  state: () => ({
-    pluginConfigs: [] as PluginConfig[]
-  }),
+  state: () => {
+    return {
+      pluginConfigs: [] as PluginConfig[]
+    }
+  },
 
   actions: {
     setPluginConfigs(pluginConfigs: PluginConfig[]) {
       this.pluginConfigs = pluginConfigs
+    },
+
+    initializePluginConfigs(pluginConfigs: PluginConfig[]) {
+      console.log('initializePluginConfigs', pluginConfigs)
+      if (!pluginConfigs?.length) this.addEmptyPluginConfig()
+      else {
+        this.pluginConfigs.push(...pluginConfigs)
+      }
+    },
+
+    addEmptyPluginConfig() {
+      this.addPluginConfig({
+        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        name: `Config ${this.pluginConfigs.length + 1}`,
+        settings: {
+          figma: {
+            pageId: '',
+            assetIds: []
+          },
+          code: {
+            format: 'SVG',
+            properties: {}
+          },
+          export: {
+            prefixToAdd: '',
+            prefixToRemove: '',
+            suffixToAdd: '',
+            suffixToRemove: '',
+            defaultExportsFile: ''
+          },
+          github: {
+            repository: '',
+            branch: '',
+            path: '',
+            accessToken: ''
+          },
+        }
+      })
     },
 
     addPluginConfig(pluginConfig: PluginConfig) {
@@ -19,11 +59,23 @@ export const useConfigStore = defineStore('config', {
         {
           pluginMessage: {
             event: 'update-plugin-configs',
-            pluginConfigs: JSON.stringify(this.pluginConfigs),
+            value: JSON.stringify(this.pluginConfigs),
           },
         },
         '*'
       )
+    },
+
+    setConfigProperties(configIndex: number, properties: ComponentPropertyDefinitions) {
+      Object.keys(properties).forEach(property => {
+        if (!this.pluginConfigs[configIndex].settings.code.properties[property]) {
+          this.pluginConfigs[configIndex].settings.code.properties[property] = {
+            options: properties[property].variantOptions || [],
+            visible: true,
+            defaultValue: properties[property].defaultValue
+          }
+        }
+      })
     }
   }
 })

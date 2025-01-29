@@ -1,25 +1,40 @@
 import { defineStore } from 'pinia'
 
 export const useFigmaStore = defineStore('figma', {
-  state: () => ({
-    currentPage: {} as PageNode,
-    assets: [] as SceneNode[],
-    /** Defines if the export process is in progress or not */
-    exporting: false,
-  }),
-
-  getters: {
-    pages: state => state.currentPage.parent?.children,
+  state: () => {
+    return {
+      currentPage: {} as PageNode,
+      pages: [] as PageNode[],
+      assets: [] as SceneNode[],
+      properties: {} as ComponentPropertyDefinitions,
+      /** Defines if the export process is in progress or not */
+      exporting: false,
+    }
   },
 
   actions: {
-    /** Defines a new value for the entire currentPage object */
     setCurrentPage(currentPage: PageNode) {
-      Object.assign(this.currentPage, currentPage)
-      Object.assign(this.assets, currentPage.children?.filter(child =>
+      this.currentPage = currentPage
+    },
+
+    setPages(pages: PageNode[]) {
+      this.pages = pages
+    },
+
+    setAssets(assets: SceneNode[]) {
+      this.assets = assets
+    },
+
+    setAssetsFromPage(page: PageNode) {
+      this.assets = page.children?.filter(child =>
         child.type === 'COMPONENT' ||
         child.type === 'COMPONENT_SET'
-      ))
+      )
+      console.log(this.assets)
+    },
+
+    setPropertiesFromPageAssets(properties: ComponentPropertyDefinitions) {
+      this.properties = properties
     },
 
     setExporting(exporting: boolean) {

@@ -29,25 +29,30 @@ export default class GithubConnector {
 
     API.authenticate(params.accessToken)
 
-    this.blobLimiter = new RateLimiter(20)
+    this.blobLimiter = new RateLimiter(3)
   }
 
   /// Blob methods
   async createFile({
     name, extension, content, encoding
   }: CreateBlobDto) {
-    const file = (await this.blobLimiter.enqueue(Blobs.createBlob, {
-      owner: this.repositoryOwner,
-      repo: this.repositoryName,
-      content,
-      encoding,
-    })) as { url: string; sha: string }
+    try {
+      const file = (await this.blobLimiter.enqueue(Blobs.createBlob, {
+        owner: this.repositoryOwner,
+        repo: this.repositoryName,
+        content,
+        encoding,
+      })) as { url: string; sha: string }
 
-    return {
-      name,
-      extension,
-      url: file?.url,
-      sha: file?.sha,
+      return {
+        name,
+        extension,
+        url: file?.url,
+        sha: file?.sha,
+      }
+    } catch (error) {
+      console.log('create file error: ', error)
+      throw error
     }
   }
 
@@ -198,8 +203,7 @@ export default class GithubConnector {
     extension,
     destinationFolder,
     commitMessage,
-    createDefaultExportsFile,
-    defaultExportsFileExtension,
+    defaultExportsFile,
   }: ExportFilesDto) {
     const files: File[] = []
 
@@ -209,9 +213,9 @@ export default class GithubConnector {
 
         return this.createFile({
           name: componentName,
-          extension: extension,
           content: component,
           encoding: 'utf-8',
+          extension,
         })
       })
     )
@@ -221,14 +225,18 @@ export default class GithubConnector {
       files.push(file)
     }
 
-    if (createDefaultExportsFile) {
+    if (defaultExportsFile) {
       const defaultExportsContent = Object.keys(components)
         .map(name => `export { default as ${name} } from './${name}.${extension}'`)
         .join('\n')
 
+      const fileNameSplitted = defaultExportsFile.split('.')
+      const fileExtension = fileNameSplitted.pop()
+      const fileName = fileNameSplitted.join('.')
+
       const file = await this.createFile({
-        name: 'exported-assets',
-        extension: defaultExportsFileExtension,
+        name: fileName,
+        extension: fileExtension || 'js',
         content: defaultExportsContent,
         encoding: 'utf-8',
       })

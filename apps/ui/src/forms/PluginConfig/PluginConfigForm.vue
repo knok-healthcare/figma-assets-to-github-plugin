@@ -1,218 +1,359 @@
 <template>
   <div class="plugin-config-form">
-    <h6>
-      Figma Settings
-    </h6>
+    <Fieldset
+      class="w-full"
+      legend="Figma Settings">
+      <Row
+        fill
+        inline>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <Select
+                id="page"
+                v-model="settings.figma.pageId"
+                :options="availablePages"
+                option-value="id"
+                option-label="name"
+              />
 
-    <Row
-      fill
-      inline>
-      <Column>
-        <InputGroup>
-          <label for="pageId">
-            Page <small>(mandatory)</small>
-          </label>
+              <label for="pageId">
+                Page <small>(mandatory)</small>
+              </label>
+            </FloatLabel>
+          </InputGroup>
+        </Column>
 
-          <InputText
-            id="pageId"
-            :value="currentPage.name"
-            disabled
-            type="text"
-            placeholder="example: Icon config"
-          />
-        </InputGroup>
-      </Column>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <!-- multi-select currentPage.children-->
+              <MultiSelect
+                id="assets"
+                v-model="settings.figma.assetIds"
+                :options="availableAssets"
+                option-value="id"
+                option-label="name"
+                :max-selected-labels="3"
+                class="w-full md:w-80" />
 
-      <Column>
-        <InputGroup>
-          <label for="assets">
-            Assets <small>(at least one)</small>
-          </label>
+              <label for="assets">
+                Assets to export <small>(at least one)</small>
+              </label>
+            </FloatLabel>
+          </InputGroup>
+        </Column>
+      </Row>
+    </Fieldset>
 
-          <!-- multi-select currentPage.children-->
-          <MultiSelect
-            id="assets"
-            v-model="settings.figma.assetIds"
-            :options="availableAssets"
-            option-value="id"
-            option-label="name"
-            placeholder="Select assets"
-            :max-selected-labels="3"
-            class="w-full md:w-80" />
-        </InputGroup>
-      </Column>
-    </Row>
+    <Fieldset
+      class="w-full"
+      legend="Code Settings">
+      <Row fill>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <label for="format">
+                Format
+              </label>
 
-    <h6>
-      Code Settings
-    </h6>
+              <Select
+                id="format"
+                v-model="settings.code.format"
+                :options="['SVG', 'Vue']"
+                placeholder="Select an export format"
+                class="w-full md:w-56" />
+            </FloatLabel>
+          </InputGroup>
+        </Column>
 
-    <Row fill>
-      <Column>
-        <InputGroup>
-          <label for="format">
-            Format
-          </label>
-
-          <Select
-            id="format"
-            v-model="settings.code.format"
-            :options="['SVG', 'Vue']"
-            placeholder="Select an export format"
-            class="w-full md:w-56" />
-        </InputGroup>
-      </Column>
-
-      <Column v-if="settings.code.format === 'Vue'">
-        <InputGroup>
+        <div
+          v-if="settings.code.format === 'Vue'"
+          class="mt-4">
           <label for="properties">
             Properties
           </label>
 
-          <!--...table with properties, with name of the property,
-           if it's visible, and the default value-->
-        </InputGroup>
-      </Column>
-    </Row>
+          <DataTable
+            :value="Object.keys(availableProperties)"
+            class="w-full">
+            <TableColumn field="visible">
+              <template #body="slotProps">
+                <Checkbox
+                  v-model="settings.code.properties[slotProps.data].visible"
+                  :binary="true" />
+              </template>
+            </TableColumn>
 
-    <h6>
-      Export Settings
-    </h6>
+            <TableColumn
+              field="name"
+              header="Name">
+              <template #body="slotProps">
+                {{ slotProps.data }}
+              </template>
+            </TableColumn>
 
-    <Row
-      fill
-      inline>
-      <Column>
-        <InputGroup fill>
-          <label for="prefixToRemove">
-            Old prefix
-          </label>
+            <TableColumn
+              field="variantOptions"
+              header="Options">
+              <template #body="slotProps">
+                <MultiSelect
+                  v-model="settings.code.properties[slotProps.data].options"
+                  :options="availableProperties[slotProps.data].variantOptions"
+                  :max-selected-labels="2"
+                  class="w-full md:w-80" />
+              </template>
+            </TableColumn>
 
-          <InputText
-            id="prefixToRemove"
-            v-model="settings.export.prefixToRemove"
-            type="text"
-            placeholder="text to remove from the start of asset name"
-          />
-        </InputGroup>
-      </Column>
+            <TableColumn
+              field="defaultValue"
+              header="Default Value">
+              <template #body="slotProps">
+                <InputText
+                  v-model="settings.code.properties[slotProps.data].defaultValue"
+                  type="text" />
+              </template>
+            </TableColumn>
+          </DataTable>
+        </div>
+      </Row>
+    </Fieldset>
 
-      <Column>
-        <InputGroup fill>
-          <label for="prefixToAdd">
-            New prefix
-          </label>
+    <Fieldset
+      class="w-full"
+      legend="Export Settings">
+      <Row
+        fill
+        inline>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="prefixToRemove"
+                v-model="settings.export.prefixToRemove"
+                type="text"
+              />
 
-          <InputText
-            id="prefixToAdd"
-            v-model="settings.export.prefixToAdd"
-            type="text"
-            placeholder="text to add to the start of asset name"
-          />
-        </InputGroup>
-      </Column>
-    </Row>
+              <label for="prefixToRemove">
+                Old prefix
+              </label>
+            </FloatLabel>
+          </InputGroup>
 
-    <Row
-      fill
-      inline>
-      <Column>
-        <InputGroup fill>
-          <label for="suffixToRemove">
-            Old suffix
-          </label>
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            The text inside this field will be removed from the start of the asset name.
+          </Message>
+        </Column>
 
-          <InputText
-            id="suffixToRemove"
-            v-model="settings.export.suffixToRemove"
-            type="text"
-            placeholder="text to remove from the end of asset name"
-          />
-        </InputGroup>
-      </Column>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="prefixToAdd"
+                v-model="settings.export.prefixToAdd"
+                type="text"
+              />
 
-      <Column>
-        <InputGroup fill>
-          <label for="suffixToAdd">
-            New suffix
-          </label>
+              <label for="prefixToAdd">
+                New prefix
+              </label>
+            </FloatLabel>
+          </InputGroup>
 
-          <InputText
-            id="suffixToAdd"
-            v-model="settings.export.suffixToAdd"
-            type="text"
-            placeholder="text to add to the end of asset name"
-          />
-        </InputGroup>
-      </Column>
-    </Row>
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            The text inside this field will be added to the start of the asset name.
+          </Message>
+        </Column>
+      </Row>
 
-    <h6>
-      Github Settings
-    </h6>
+      <Row
+        fill
+        inline
+        class="mt-4">
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="suffixToRemove"
+                v-model="settings.export.suffixToRemove"
+                type="text"
+              />
 
-    <Row
-      fill
-      inline>
-      <Column>
+              <label for="suffixToRemove">
+                Old suffix
+              </label>
+            </FloatLabel>
+          </InputGroup>
+
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            The text inside this field will be removed from the end of the asset name.
+          </Message>
+        </Column>
+
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="suffixToAdd"
+                v-model="settings.export.suffixToAdd"
+                type="text"
+              />
+
+              <label for="suffixToAdd">
+                New suffix
+              </label>
+            </FloatLabel>
+          </InputGroup>
+
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            The text inside this field will be added to the end of the asset name.
+          </Message>
+        </Column>
+      </Row>
+    </Fieldset>
+
+    <Fieldset
+      class="w-full"
+      legend="Github Settings">
+      <Row
+        fill
+        inline>
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="repository"
+                v-model="settings.github.repository"
+                type="text"
+              />
+
+              <label for="repository">
+                Repository <small>(mandatory)</small>
+              </label>
+            </FloatLabel>
+          </InputGroup>
+
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            example: repository-owner/repository-name
+          </Message>
+        </Column>
+
+        <Column>
+          <InputGroup>
+            <FloatLabel>
+              <InputText
+                id="repositoryBranch"
+                v-model="settings.github.branch"
+                type="text"
+              />
+
+              <label for="repositoryBranch">
+                Base Branch <small>(mandatory)</small>
+              </label>
+            </FloatLabel>
+          </InputGroup>
+
+          <Message
+            severity="secondary"
+            size="small"
+            variant="simple">
+            example: development
+          </Message>
+        </Column>
+      </Row>
+
+      <Row
+        fill
+        class="mt-4">
         <InputGroup>
-          <label for="repository">
-            Repository <small>(mandatory)</small>
-          </label>
+          <FloatLabel>
+            <InputText
+              id="destinationFolder"
+              v-model="settings.github.path"
+              type="text"
+            />
 
-          <InputText
-            id="repository"
-            v-model="settings.github.repository"
-            type="text"
-            placeholder="example: repository-owner/repository-name"
-          />
+            <label for="destinationFolder">
+              Destination Folder <small>(mandatory)</small>
+            </label>
+          </FloatLabel>
         </InputGroup>
-      </Column>
 
-      <Column>
+        <Message
+          severity="secondary"
+          size="small"
+          variant="simple">
+          example: src/assets/icons
+        </Message>
+      </Row>
+
+      <Row
+        fill
+        class="mt-4">
         <InputGroup>
-          <label for="repositoryBranch">
-            Base Branch <small>(mandatory)</small>
-          </label>
+          <FloatLabel>
+            <InputText
+              id="accessToken"
+              v-model="settings.github.accessToken"
+              type="password"
+            />
 
-          <InputText
-            id="repositoryBranch"
-            v-model="settings.github.branch"
-            type="text"
-            placeholder="example: development"
-          />
+            <label for="accessToken">
+              Access Token <small>(mandatory)</small>
+            </label>
+          </FloatLabel>
         </InputGroup>
-      </Column>
-    </Row>
 
-    <Row fill>
-      <InputGroup>
-        <label for="destinationFolder">
-          Destination Folder <small>(mandatory)</small>
-        </label>
+        <Message
+          severity="secondary"
+          size="small"
+          variant="simple">
+          An access token with write access to the repository configured above.
+        </Message>
+      </Row>
+    </Fieldset>
 
-        <InputText
-          id="destinationFolder"
-          v-model="settings.github.path"
-          type="text"
-          placeholder="example: /src/assets/icons"
-        />
-      </InputGroup>
-    </Row>
+    <Button
+      label="Export"
+      icon="pi pi-github"
+      class="mt-4"
+      @click="exportAssets" />
   </div>
 </template>
 
 <script lang="ts">
 import type { PluginConfig } from "@typings/index";
-import { defineComponent } from "vue";
+import { computed, defineComponent } from "vue";
 import Column from "@/components/Grid/Column.vue";
-import InputGroup from "@/components/Forms/InputGroup.vue";
 import Row from "@/components/Grid/Row.vue";
 import { useConfigStore } from "@/stores/config";
 import { useFigmaStore } from "@/stores/figma";
 import MultiSelect from 'primevue/multiselect';
 import Select from 'primevue/select';
 import InputText from 'primevue/inputtext';
+import Fieldset from 'primevue/fieldset';
+import InputGroup from 'primevue/inputgroup';
+import FloatLabel from 'primevue/floatlabel';
+import Message from "primevue/message";
+import Button from "primevue/button";
+import DataTable from 'primevue/datatable';
+import TableColumn from 'primevue/column';
+import Checkbox from "primevue/checkbox";
 
 export default defineComponent({
   name: 'PluginConfigForm',
@@ -224,6 +365,13 @@ export default defineComponent({
     Select,
     MultiSelect,
     InputText,
+    Fieldset,
+    FloatLabel,
+    Message,
+    Button,
+    DataTable,
+    TableColumn,
+    Checkbox,
   },
 
   props: {
@@ -237,10 +385,25 @@ export default defineComponent({
     const configStore = useConfigStore()
     const figmaStore = useFigmaStore()
 
+    const pluginConfigs = computed(() => configStore.pluginConfigs)
+    const hasPluginConfigs = computed(() => configStore.pluginConfigs.length > 0)
+
+    const availablePages = computed(() => figmaStore.pages)
+    const currentPage = computed(() => figmaStore.currentPage)
+    const availableAssets = computed(() => figmaStore.assets)
+    const availableProperties = computed(() => figmaStore.properties)
+
     return {
-      pluginConfigs: configStore.pluginConfigs,
-      currentPage: figmaStore.currentPage,
-      availableAssets: figmaStore.assets,
+      configStore,
+      figmaStore,
+
+      pluginConfigs,
+      hasPluginConfigs,
+
+      currentPage,
+      availablePages,
+      availableAssets,
+      availableProperties
     }
   },
 
@@ -263,30 +426,85 @@ export default defineComponent({
 
     settings: {
       deep: true,
-      handler() {
+      handler(settings) {
         console.log('settings changed', this.pluginConfigs)
+
+        const page = this.availablePages.find(page => page.id === settings.figma.pageId)
+        if (!page) {
+          this.figmaStore.setAssets([])
+          return
+        }
+
+        this.figmaStore.setAssetsFromPage(page)
 
         parent.postMessage(
           {
             pluginMessage: {
               event: 'update-plugin-configs',
-              pluginConfigs: JSON.stringify(this.pluginConfigs),
+              value: JSON.stringify(this.pluginConfigs),
             },
           },
           '*'
         )
       }
-    }
-  }
+    },
+
+    'settings.figma.pageId': {
+      immediate: true,
+      handler(newPageId) {
+        const page = this.availablePages.find(page => page.id === newPageId)
+        if (!page) return
+        this.figmaStore.setAssetsFromPage(page)
+
+        parent.postMessage(
+          {
+            pluginMessage: {
+              event: 'get-properties-from-page',
+              pageId: newPageId,
+            },
+          },
+          '*'
+        )
+      },
+    },
+  },
+
+  methods: {
+    exportAssets() {
+      parent.postMessage(
+        {
+          pluginMessage: {
+            event: 'export-assets',
+            data: JSON.stringify(this.pluginConfigs.find(config => config.id === this.selectedConfigId)),
+          },
+        },
+        '*'
+      )
+    },
+  },
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .plugin-config-form {
   display: flex;
   flex-direction: column;
   align-items: start;
   justify-content: start;
   padding: 8px 12px;
+
+  .p-fieldset-content-container {
+    padding-top: 14px;
+  }
+
+  .mt-4 {
+    margin-top: 24px;
+  }
+
+  .p-message {
+    margin-top: 4px;
+
+    --p-message-text-sm-font-size: 10px;
+  }
 }
 </style>

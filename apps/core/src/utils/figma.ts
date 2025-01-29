@@ -1,27 +1,21 @@
-import { ClientStorageProps } from '../config/storage'
+export const PLUGIN_CONFIGS_STORAGE_KEY = 'pluginConfigs'
 
 /** Searches the client storage for the saved values of the plugin */
-export async function getStoredValues() {
-  const values = {} as Record<string, unknown>
+export async function getStoredConfigs() {
+  const value = await figma.clientStorage.getAsync(PLUGIN_CONFIGS_STORAGE_KEY)
+  if (!value) return []
 
-  for (let i = 0; i < ClientStorageProps.length; i++) {
-    const prop = ClientStorageProps[i]
-    const value = await figma.clientStorage.getAsync(prop.name)
+  return JSON.parse(value)
+}
 
-    values[prop.name] = value || prop.defaultValue
-  }
-
-  return values
+/** Saves the plugin configs to the client storage */
+export async function setStoredConfigs(configs: string) {
+  return await figma.clientStorage.setAsync(PLUGIN_CONFIGS_STORAGE_KEY, configs)
 }
 
 /** Returns all panels inside the selected figma page */
 export function getAvailablePanels() {
   return figma.currentPage.children as ComponentSetNode[]
-}
-
-/** Get all components inside a specific panel */
-export function getComponentsFromPanel(panel: ComponentSetNode) {
-  return panel.children as ComponentNode[]
 }
 
 /** Returns all components */
@@ -62,4 +56,9 @@ export function getComponentsByPageAndBoardId(pageId: string, boardId: string) {
   const components = getComponentsFromPanel(selectedBoard)
 
   return components
+}
+
+/** Get all components inside a specific panel */
+export function getComponentsFromPanel(panel: ComponentSetNode) {
+  return panel.children as ComponentNode[]
 }

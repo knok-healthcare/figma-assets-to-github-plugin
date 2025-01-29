@@ -1,24 +1,19 @@
-import type { ClientStorage } from '../../../../types'
+import type { PluginConfig } from '../../../../types'
 
-export const checkRequiredDataForExport = (payload: ClientStorage) => {
+export const checkRequiredDataForExport = (data: PluginConfig) => {
   const missingValueMessage = (fieldName: string) =>
     `Missing required value for field "${fieldName}". Please fill in the field and try again.`
 
-  // Asset Fields
-  if (!payload.exportFormat) throw new Error(missingValueMessage('Export format'))
-  if (!payload.selectedPageId) throw new Error(missingValueMessage('Page'))
-  if (!payload.selectedBoardId) throw new Error(missingValueMessage('Board'))
-  if (payload.rtlEnabled) {
-    if (!payload.selectedRTLPageId)
-      throw new Error(missingValueMessage('Page with RTL variants'))
-    if (!payload.selectedRTLBoardId)
-      throw new Error(missingValueMessage('Board with RTL variants'))
-  }
+  // Figma settings
+  if (!data.settings.figma.pageId) throw new Error(missingValueMessage('Page'))
+  if (!data.settings?.figma?.assetIds?.length) throw new Error(missingValueMessage('Assets'))
 
-  // Github Fields
-  if (!payload.accessToken) throw new Error(missingValueMessage('Github access token'))
-  if (!payload.repositoryOwner) throw new Error(missingValueMessage('Repository Owner'))
-  if (!payload.repositoryName) throw new Error(missingValueMessage('Repository Name'))
-  if (!payload.destinationFolder)
-    throw new Error(missingValueMessage('Destination Folder'))
+  // Code Settings
+  if (!data.settings.code.format) throw new Error(missingValueMessage('Format'))
+
+  // Github Settings
+  if (!data.settings.github.accessToken) throw new Error(missingValueMessage('Access token'))
+  if (!data.settings.github.repository) throw new Error(missingValueMessage('Repository'))
+  if (!data.settings.github.branch) throw new Error(missingValueMessage('Base Branch'))
+  if (!data.settings.github.path) throw new Error(missingValueMessage('Destination Folder'))
 }

@@ -29,12 +29,13 @@ export type PluginConfig = {
          *
          * @type {{
          *  visible: boolean,
-         *  defaultValue?: string | number | boolean | null
+         *  defaultValue?: string | boolean | null
          * }} Defines if a property will be exported and its default value
          */
         [propName: string]: {
+          options: string[],
           visible: boolean,
-          defaultValue?: string | number | boolean | null
+          defaultValue?: string | boolean | null
         }
       }
     },

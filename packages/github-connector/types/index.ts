@@ -22,7 +22,7 @@ export type CreateBlobDto = {
   /** Body of the file */
   content: string
   /** File encoding */
-  encoding: 'utf-8'
+  encoding: 'utf-8' | 'base64'
 }
 
 export type NewPullRequestDto = {
@@ -51,9 +51,7 @@ export type ExportFilesDto = {
    */
   destinationFolder: string
   /** Defines if the default exports file should be created or not */
-  createDefaultExportsFile: boolean
-  /** Defines the extension of the default exports file */
-  defaultExportsFileExtension: string
+  defaultExportsFile: string
 }
 
 export type File = {
