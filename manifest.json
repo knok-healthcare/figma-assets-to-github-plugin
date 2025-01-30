@@ -1,7 +1,7 @@
 {
   "name": "figma-assets-to-github-plugin",
   "id": "1250083994048709468",
-  "api": "1.0.0",
+  "api": "2.0.0",
   "main": "apps/core/dist/index.js",
   "ui": "apps/ui/dist/index.html",
   "capabilities": [],

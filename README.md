@@ -73,5 +73,5 @@ Read our [contribution guide](./CONTRIBUTING.md) for more details on how to cont
 ---
 
 <p align="center">
-    <a href="https://knokcare.com">Knok</a>
+    <a href="https://knokcare.com">knok</a>
 </p>

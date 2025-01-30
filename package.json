@@ -1,6 +1,6 @@
 {
   "name": "figma-assets-to-github-plugin",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A figma plugin to export assets to a github repository.",
   "author": "knok-healthcare",
   "license": "MIT",
