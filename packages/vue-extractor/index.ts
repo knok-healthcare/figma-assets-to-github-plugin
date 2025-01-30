@@ -66,17 +66,22 @@ function buildComponentTemplate(variants: VariantData[]) {
 }
 
 function buildComponentScript(name: string, properties: ComponentPropertyDefinitions) {
-  const props = Object.entries(properties).map(
-    ([key, value]) => `${key}: {
+  const props = Object.entries(properties).map(([key, value]) => {
+    const variants = value?.variantOptions || []
+    const type = variants.length ? `{ "${variants.join('" | "')}" }` : '{string}'
+    const validator = variants.length
+      ? `validator: (value) => { ["${variants.join('", "')}"].includes(value) }`
+      : ''
+
+    return `/**
+\t * @type ${type}
+\t */
+\t${key}: {
 \t\ttype: String,
 \t\tdefault: '${value.defaultValue}',
-    ${
-  value?.variantOptions?.length
-    ? `\t\tvalidator: (value) => { [${value?.variantOptions?.join(', ')}].includes(value) }`
-    : ''
-}
+\t\t${validator}
 \t}`
-  )
+  })
 
   return `
 <script>
