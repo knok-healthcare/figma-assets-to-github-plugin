@@ -44,6 +44,18 @@
   <PluginConfigForm
     v-if="gotInitialData"
     :selected-config-id="selectedTab.id" />
+
+  <BlockUI
+    :blocked="figmaStore.exporting"
+    full-screen />
+
+  <ProgressSpinner
+    v-if="figmaStore.exporting"
+    style="position: fixed; top: 50%; left: 50%;width: 50px; height: 50px; transform: translateX(-50%) translateY(-50%);"
+    stroke-width="8"
+    fill="transparent"
+    animation-duration=".5s"
+    aria-label="Exporting assets to github" />
 </template>
 
 <script lang="ts">
@@ -55,6 +67,8 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import SpeedDial from 'primevue/speeddial';
 import Button from 'primevue/button';
+import BlockUI from 'primevue/blockui';
+import ProgressSpinner from 'primevue/progressspinner';
 // Data Stores
 import { useConfigStore } from '@/stores/config'
 import { useFigmaStore } from '@/stores/figma';
@@ -73,7 +87,8 @@ export default defineComponent({
     SpeedDial,
     Button,
     PluginConfigForm,
-
+    BlockUI,
+    ProgressSpinner
   },
 
   setup() {
@@ -102,9 +117,15 @@ export default defineComponent({
 
         figmaStore.setPropertiesFromPageAssets(event.data.pluginMessage.properties)
       }
+
+      if (event.data.pluginMessage.event === 'export-completed') {
+        figmaStore.setExporting(false)
+        alert('Export completed!')
+      }
     }
 
     return {
+      figmaStore,
       gotInitialData,
       pluginConfigs: configStore.pluginConfigs,
       addEmptyPluginConfig: configStore.addEmptyPluginConfig,
