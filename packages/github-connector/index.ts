@@ -29,7 +29,7 @@ export default class GithubConnector {
 
     API.authenticate(params.accessToken)
 
-    this.blobLimiter = new RateLimiter(3)
+    this.blobLimiter = new RateLimiter(20)
   }
 
   /// Blob methods
@@ -179,9 +179,23 @@ export default class GithubConnector {
     return pullRequests
   }
 
-  async openPullRequest({ baseBranch, headBranch }: NewPullRequestDto) {
+  async openPullRequest({ baseBranch, headBranch, files }: NewPullRequestDto) {
     if (!headBranch) throw new Error('Missing required head branch name parameter.')
     if (!baseBranch) throw new Error('Missing required base branch name parameter.')
+
+    const pullRequestBody = `## 🦄 Figma Asset Export
+
+### 🔍 Summary
+This pull request contains your new/updated SVG assets from Figma.
+
+### 📝 Details
+- Exported assets: **${files.length}**
+- Exported at: ${new Date().toISOString()}
+
+### 📚 To do
+- [ ] Ensure asset names are correct
+- [ ] Ensure asset structure is correct
+`
 
     const pullRequest = Pulls.createPullRequest({
       owner: this.repositoryOwner,
@@ -189,8 +203,8 @@ export default class GithubConnector {
       draft: false,
       base: baseBranch,
       head: headBranch,
-      body: 'example pull request',
-      title: 'feat(assets): update exported assets from figma',
+      body: pullRequestBody,
+      title: 'chore(assets): update exported assets from figma',
     })
 
     return pullRequest
@@ -269,6 +283,7 @@ export default class GithubConnector {
       return await this.openPullRequest({
         baseBranch: baseBranchName,
         headBranch: headBranchName,
+        files: Object.keys(components),
       })
     }
   }

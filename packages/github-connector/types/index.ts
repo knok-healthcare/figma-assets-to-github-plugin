@@ -30,6 +30,8 @@ export type NewPullRequestDto = {
   baseBranch: string
   /** Name of the new branch that has the updated assets from figma */
   headBranch: string
+  /** Array of files to be added to the pull request */
+  files: string[]
 }
 
 export type ExportFilesDto = {
