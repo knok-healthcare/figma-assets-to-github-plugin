@@ -27,13 +27,13 @@
         <Column>
           <InputGroup>
             <FloatLabel>
-              <!-- multi-select currentPage.children-->
               <MultiSelect
                 id="assets"
                 v-model="settings.figma.assetIds"
                 :options="availableAssets"
                 option-value="id"
                 option-label="name"
+                filter
                 :max-selected-labels="3"
                 class="w-full md:w-80" />
 
