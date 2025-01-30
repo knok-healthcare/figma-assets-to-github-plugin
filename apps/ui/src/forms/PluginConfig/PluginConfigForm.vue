@@ -332,6 +332,7 @@
       label="Export"
       icon="pi pi-github"
       class="mt-4"
+      :loading="figmaStore.exporting"
       @click="exportAssets" />
   </div>
 </template>
@@ -470,7 +471,30 @@ export default defineComponent({
   },
 
   methods: {
+    settingsAreValid() {
+      // Required fields
+      if (!this.settings.figma.pageId) return alert('Please select a page')
+      if (!this.settings.figma.assetIds.length) return alert('Please select at least one asset')
+      if (!this.settings.github.repository) return alert('Please enter a Github repository')
+      if (!this.settings.github.branch) return alert('Please enter a base branch')
+      if (!this.settings.github.path) return alert('Please enter a destination folder')
+      if (!this.settings.github.accessToken) return alert('Please enter a Github access token with write access to the repository')
+      if (!this.settings.code.format) return alert('Please select an export format')
+
+      // TODOS:
+      if (this.settings.code.format === 'SVG') return alert('SVG support is coming soon.')
+
+      // Field specific validations
+      if (this.settings.github.path.startsWith('/')) return alert('Destination folder cannot start with a slash')
+
+      return true
+    },
+
     exportAssets() {
+      if (!this.settingsAreValid()) return
+
+      this.figmaStore.setExporting(true)
+
       parent.postMessage(
         {
           pluginMessage: {
@@ -505,6 +529,10 @@ export default defineComponent({
     margin-top: 4px;
 
     --p-message-text-sm-font-size: 10px;
+  }
+
+  .p-datatable-table {
+    font-size: inherit;
   }
 }
 </style>
