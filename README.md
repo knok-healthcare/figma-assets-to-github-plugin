@@ -1,6 +1,6 @@
 <div align="center">
 
-![Figma to Github Plugin Icon](/assets/icons/icon256.svg)
+![Figma Assets to Github Plugin Banner](/assets/icons/banner.jpg)
 
 # Figma Assets to Github Plugin
 
@@ -8,9 +8,8 @@
 
 This plugin adds the ability to export figma assets (icons) to a github repository through a pull request.
 
-[📚 Documentation](https://github.com/knok-healthcare/figma-assets-to-github-plugin/wiki) | 
+[📚 Documentation](https://github.com/knok-healthcare/figma-assets-to-github-plugin/wiki) |
 [🧩 Plugin](https://www.figma.com/community/plugin/1250083994048709468/Figma-assets-to-Github-plugin)
-
 
 ---
 
@@ -73,5 +72,5 @@ Read our [contribution guide](./CONTRIBUTING.md) for more details on how to cont
 ---
 
 <p align="center">
-    <a href="https://knokcare.com">knok</a>
+  <a href="https://knokcare.com">knok</a>
 </p>
