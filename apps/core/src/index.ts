@@ -217,8 +217,6 @@ async function exportAssets(data: PluginConfigType) {
       }
     })
 
-    console.log('components', components)
-
     // Component extraction process
     let files = {} as Record<string, string>
 

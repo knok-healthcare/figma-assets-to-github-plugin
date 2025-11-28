@@ -14,7 +14,6 @@ export const useConfigStore = defineStore('config', {
     },
 
     initializePluginConfigs(pluginConfigs: PluginConfig[]) {
-      console.log('initializePluginConfigs', pluginConfigs)
       if (!pluginConfigs?.length) this.addEmptyPluginConfig()
       else {
         this.pluginConfigs.push(...pluginConfigs)

@@ -30,7 +30,6 @@ export const useFigmaStore = defineStore('figma', {
         child.type === 'COMPONENT' ||
         child.type === 'COMPONENT_SET'
       )
-      console.log(this.assets)
     },
 
     setPropertiesFromPageAssets(properties: ComponentPropertyDefinitions) {

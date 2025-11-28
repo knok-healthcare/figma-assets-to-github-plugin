@@ -70,7 +70,7 @@ function buildComponentScript(name: string, properties: ComponentPropertyDefinit
     const variants = value?.variantOptions || []
     const type = variants.length ? `{ "${variants.join('" | "')}" }` : '{string}'
     const validator = variants.length
-      ? `validator: (value) => { ["${variants.join('", "')}"].includes(value) }`
+      ? `validator: (value) => ["${variants.join('", "')}"].includes(value)`
       : ''
 
     return `/**

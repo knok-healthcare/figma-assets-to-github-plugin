@@ -428,8 +428,6 @@ export default defineComponent({
     settings: {
       deep: true,
       handler(settings) {
-        console.log('settings changed', this.pluginConfigs)
-
         const page = this.availablePages.find(page => page.id === settings.figma.pageId)
         if (!page) {
           this.figmaStore.setAssets([])
