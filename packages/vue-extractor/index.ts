@@ -28,6 +28,17 @@ export async function useVueExtractor(components: ComponentData[]) {
       })
     }
 
+    if (component.variants.length === 0) {
+      const svg = await component.component.exportAsync({
+        format: 'SVG_STRING',
+      })
+
+      variants.push({
+        properties: null,
+        svg,
+      })
+    }
+
     const templateString = buildComponentTemplate(variants)
     const templateScript = buildComponentScript(component.name, component.properties)
     templateStrings[component.name] = templateString + templateScript

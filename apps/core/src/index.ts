@@ -109,7 +109,6 @@ async function onMessageEvent(payload: PostMessageEvent) {
   }
 
   if (payload.event === 'export-assets') {
-    console.log('got export assets eevent', payload)
     if (!payload.data) {
       const error = 'Missing required "data" property for event "export-assets".'
       console.log(error)
