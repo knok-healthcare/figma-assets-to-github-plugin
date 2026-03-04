@@ -54,6 +54,8 @@ export type ExportFilesDto = {
   destinationFolder: string
   /** Defines if the default exports file should be created or not */
   defaultExportsFile: string
+  /** Suffix that was appended to file names during export (will be stripped from the asset types) */
+  suffixToAdd?: string
 }
 
 export type File = {

@@ -243,7 +243,8 @@ async function exportAssets(data: PluginConfigType) {
       components: files,
       extension: data.settings.code.format.toLowerCase(),
       commitMessage: PluginConfig.github.commitMessage,
-      destinationFolder: data.settings.github.path
+      destinationFolder: data.settings.github.path,
+      suffixToAdd: data.settings.export.suffixToAdd || undefined,
     })
 
     figma.ui.postMessage({
